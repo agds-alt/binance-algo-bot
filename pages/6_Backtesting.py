@@ -20,6 +20,22 @@ st.set_page_config(page_title="Backtesting", page_icon="📊", layout="wide")
 
 st.title("📊 Strategy Backtesting")
 
+# Initialize tier with license detection
+if 'tier' not in st.session_state:
+    try:
+        from modules.license_state import get_license_state
+        license_state = get_license_state()
+
+        if license_state.license_key and license_state.is_valid:
+            st.session_state.tier = license_state.tier
+            st.session_state.license_active = True
+        else:
+            st.session_state.tier = 'free'
+            st.session_state.license_active = False
+    except Exception:
+        st.session_state.tier = 'free'
+        st.session_state.license_active = False
+
 # Check tier
 current_tier = st.session_state.get('tier', 'free')
 
