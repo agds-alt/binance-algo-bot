@@ -17,7 +17,34 @@ from modules.bot_state_manager import get_bot_state_manager
 
 st.set_page_config(page_title="Performance", page_icon="💰", layout="wide")
 
-st.title("💰 Performance Dashboard")
+# Enhanced CSS for Performance page
+st.markdown("""
+<style>
+    /* Section headers */
+    .section-header {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #e5e7eb;
+    }
+
+    /* Main title */
+    .main-title {
+        font-size: 2.4rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown('<div class="main-title">💰 Performance Dashboard</div>', unsafe_allow_html=True)
+st.caption("Real-time performance analytics and trading metrics")
 
 # Initialize state manager
 state_manager = get_bot_state_manager()
@@ -49,7 +76,7 @@ with col3:
 st.markdown("---")
 
 # Key Performance Metrics - REAL DATA
-st.markdown("### 📊 Key Metrics")
+st.markdown('<div class="section-header">📊 Key Metrics</div>', unsafe_allow_html=True)
 
 col1, col2, col3, col4, col5 = st.columns(5)
 
@@ -86,7 +113,7 @@ st.markdown("---")
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown("### 📈 Equity Curve")
+    st.markdown('<div class="section-header">📈 Equity Curve</div>', unsafe_allow_html=True)
 
     if not trades:
         st.info("📊 Equity curve available after first trades. Run test_trading.py or start live trading!")
