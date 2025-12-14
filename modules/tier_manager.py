@@ -245,6 +245,18 @@ class TierManager:
             next_tier = self.get_next_tier()
             logger.info(f"🎁 Trial available: {trial['duration_days']} days {next_tier} trial")
 
+    def get_max_daily_trades(self) -> int:
+        """Get maximum daily trades for current tier"""
+        return self.current_tier_config['features']['max_daily_trades']
+
+    def get_max_positions(self) -> int:
+        """Get maximum concurrent positions for current tier"""
+        return self.current_tier_config['features']['max_concurrent_positions']
+
+    def get_max_position_size(self) -> float:
+        """Get maximum position size in USD for current tier"""
+        return self.current_tier_config['features']['max_position_size_usd']
+
     def get_stats(self) -> Dict:
         """Get current tier statistics"""
         features = self.current_tier_config['features']
