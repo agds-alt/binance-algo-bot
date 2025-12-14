@@ -103,7 +103,12 @@ except Exception as e:
 
 # Sidebar
 with st.sidebar:
-    st.image("https://via.placeholder.com/150x150.png?text=ALGO+BOT", width=150)
+    # Logo
+    st.markdown("""
+    <div style="text-align: center; padding: 1rem;">
+        <h1 style="font-size: 4rem; margin: 0;">🤖</h1>
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown("### 🤖 Binance Algo Bot")
     st.markdown(f"**Version:** 1.0.0")
