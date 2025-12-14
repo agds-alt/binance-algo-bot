@@ -1,0 +1,321 @@
+# ============================================================================
+# FREEMIUM TIER SYSTEM - PRODUCTION READY
+# ============================================================================
+
+tiers:
+  # ----------------------------------------------------------------------------
+  # FREE TIER - Untuk Build Trust & User Base
+  # ----------------------------------------------------------------------------
+  free:
+    name: "Free"
+    price: 0
+    billing: "forever"
+
+    features:
+      # Trading Limits
+      max_position_size_usd: 100  # Max $100 per trade
+      max_daily_trades: 3  # Max 3 trades per day
+      max_concurrent_positions: 1  # Only 1 position at a time
+      available_leverage: [3]  # Only 3x leverage
+
+      # Trading Mode
+      paper_trading: true  # Paper trading only
+      live_trading: false  # No live trading
+      testnet_trading: true  # Binance testnet allowed
+
+      # Signals & Strategy
+      signal_quality: "basic"  # Basic signals only
+      available_strategies:
+        - "trend_following_basic"
+      max_signals_per_day: 10
+
+      # Indicators (Limited)
+      indicators:
+        - "ema"
+        - "rsi"
+        - "macd"
+      advanced_indicators: false
+
+      # Pairs
+      available_pairs:
+        - "BTC/USDT"
+      max_pairs: 1
+
+      # Analytics
+      historical_data_days: 7  # Last 7 days only
+      performance_charts: "basic"
+      export_data: false
+
+      # Support
+      support_level: "community"  # Forum/community only
+      response_time: "48-72h"
+
+      # Alerts
+      telegram_alerts: true
+      email_alerts: false
+      sms_alerts: false
+
+      # Customization
+      custom_strategies: false
+      strategy_builder: false
+      api_access: false
+
+    # What Free Users See
+    upsell_message: "Upgrade to PRO untuk unlock live trading, advanced strategies, dan unlimited signals! 🚀"
+
+  # ----------------------------------------------------------------------------
+  # PRO TIER - Untuk Serious Traders
+  # ----------------------------------------------------------------------------
+  pro:
+    name: "Pro"
+    price: 99  # USD per month
+    billing: "monthly"
+
+    features:
+      # Trading Limits
+      max_position_size_usd: 5000  # Max $5k per trade
+      max_daily_trades: 20  # Max 20 trades per day
+      max_concurrent_positions: 3  # Up to 3 positions
+      available_leverage: [3, 5, 7, 10]  # Up to 10x
+
+      # Trading Mode
+      paper_trading: true
+      live_trading: true  # ✅ LIVE TRADING ENABLED
+      testnet_trading: true
+
+      # Signals & Strategy
+      signal_quality: "advanced"
+      available_strategies:
+        - "trend_following_basic"
+        - "trend_following_advanced"
+        - "mean_reversion"
+        - "breakout_strategy"
+      max_signals_per_day: 100  # Unlimited effectively
+
+      # Indicators (Full Access)
+      indicators:
+        - "ema"
+        - "rsi"
+        - "macd"
+        - "bollinger_bands"
+        - "atr"
+        - "volume_profile"
+        - "fibonacci"
+      advanced_indicators: true
+
+      # Pairs
+      available_pairs:
+        - "BTC/USDT"
+        - "ETH/USDT"
+        - "SOL/USDT"
+        - "BNB/USDT"
+      max_pairs: 5
+
+      # Analytics
+      historical_data_days: 90  # Last 90 days
+      performance_charts: "advanced"
+      export_data: true  # CSV/Excel export
+      backtesting: true  # ✅ Backtesting enabled
+
+      # Support
+      support_level: "priority"
+      response_time: "12-24h"
+      dedicated_support: false
+
+      # Alerts
+      telegram_alerts: true
+      email_alerts: true
+      sms_alerts: false
+
+      # Customization
+      custom_strategies: true  # Can create custom strategies
+      strategy_builder: "basic"
+      api_access: "limited"
+
+    # Bonuses
+    bonuses:
+      - "Weekly strategy updates"
+      - "Private Telegram group access"
+      - "Monthly performance report"
+
+  # ----------------------------------------------------------------------------
+  # PREMIUM TIER - Untuk Professional Traders
+  # ----------------------------------------------------------------------------
+  premium:
+    name: "Premium"
+    price: 249  # USD per month
+    billing: "monthly"
+
+    features:
+      # Trading Limits
+      max_position_size_usd: -1  # Unlimited (respect risk management)
+      max_daily_trades: -1  # Unlimited
+      max_concurrent_positions: 10  # Up to 10 positions
+      available_leverage: [3, 5, 7, 10]  # Up to 10x
+
+      # Trading Mode
+      paper_trading: true
+      live_trading: true
+      testnet_trading: true
+
+      # Signals & Strategy
+      signal_quality: "institutional"
+      available_strategies: "all"  # All strategies
+      max_signals_per_day: -1  # Unlimited
+
+      # Indicators (Full Suite)
+      indicators: "all"
+      advanced_indicators: true
+      custom_indicators: true  # Can add custom indicators
+
+      # Pairs
+      available_pairs: "all"  # All available pairs
+      max_pairs: -1  # Unlimited
+
+      # Multi-Exchange
+      available_exchanges:
+        - "binance"
+        - "bybit"
+        - "okx"
+        - "bitget"
+
+      # Analytics
+      historical_data_days: 365  # 1 year
+      performance_charts: "professional"
+      export_data: true
+      backtesting: true
+      optimization_tools: true  # Strategy optimization
+
+      # Support
+      support_level: "vip"
+      response_time: "2-6h"
+      dedicated_support: true
+      priority_feature_requests: true
+
+      # Alerts
+      telegram_alerts: true
+      email_alerts: true
+      sms_alerts: true
+      webhook_alerts: true
+
+      # Customization
+      custom_strategies: true
+      strategy_builder: "advanced"
+      api_access: "full"  # Full REST API access
+      white_label: false
+
+    # Bonuses
+    bonuses:
+      - "1-on-1 strategy consultation"
+      - "Custom strategy development"
+      - "VIP Telegram group"
+      - "Early access to new features"
+      - "Monthly performance review call"
+
+  # ----------------------------------------------------------------------------
+  # ENTERPRISE TIER - Untuk Institutions/Fund Managers
+  # ----------------------------------------------------------------------------
+  enterprise:
+    name: "Enterprise"
+    price: 999  # USD per month (or custom)
+    billing: "custom"
+
+    features:
+      # Everything in Premium +
+      white_label: true  # Can rebrand
+      multi_account: true  # Manage multiple accounts
+      team_access: true  # Team collaboration
+      custom_development: true
+
+      # Support
+      support_level: "24/7"
+      response_time: "< 1h"
+      dedicated_account_manager: true
+
+      # Infrastructure
+      dedicated_server: true
+      custom_deployment: true
+      on_premise_option: true
+
+    bonuses:
+      - "Custom feature development"
+      - "Dedicated infrastructure"
+      - "SLA guarantee 99.9%"
+      - "Quarterly strategy review"
+
+# ============================================================================
+# CONVERSION STRATEGY
+# ============================================================================
+
+conversion:
+  # Free to Pro Triggers
+  free_to_pro_triggers:
+    - "After 10 successful paper trades"
+    - "When user tries to enable live trading"
+    - "When daily trade limit hit 3 times"
+    - "After 7 days of usage"
+
+  # Pro to Premium Triggers
+  pro_to_premium_triggers:
+    - "When managing > 3 concurrent positions"
+    - "When using > 5 trading pairs"
+    - "After $10k+ in paper profits"
+    - "When requesting multi-exchange"
+
+  # Trial Options
+  trials:
+    pro_trial:
+      enabled: true
+      duration_days: 7
+      requires_payment_method: true
+      auto_convert: true
+
+    premium_trial:
+      enabled: true
+      duration_days: 3
+      requires_payment_method: true
+      auto_convert: true
+
+# ============================================================================
+# FEATURE GATES - For Code Implementation
+# ============================================================================
+
+feature_gates:
+  live_trading:
+    required_tier: "pro"
+    error_message: "Live trading requires PRO tier. Upgrade to start trading with real money! 💰"
+
+  advanced_strategies:
+    required_tier: "pro"
+    error_message: "Advanced strategies available in PRO tier. Upgrade to access 10+ proven strategies! 📈"
+
+  multi_exchange:
+    required_tier: "premium"
+    error_message: "Multi-exchange trading is a PREMIUM feature. Upgrade to trade on Binance, Bybit, OKX and more! 🚀"
+
+  api_access:
+    required_tier: "premium"
+    error_message: "API access requires PREMIUM tier. Upgrade to integrate with your own systems! 🔌"
+
+  custom_indicators:
+    required_tier: "premium"
+    error_message: "Custom indicators available in PREMIUM tier. Upgrade to build your own edge! 🎯"
+
+# ============================================================================
+# PRICING DISPLAY
+# ============================================================================
+
+pricing_display:
+  currency: "USD"
+  show_annual_discount: true
+  annual_discount_percent: 20  # 20% off if paid yearly
+
+  # What users see
+  comparison_table:
+    highlight_tier: "pro"  # Highlight PRO as "Most Popular"
+
+  # Payment Options
+  payment_methods:
+    - "credit_card"
+    - "crypto"  # USDT, BTC
+    - "bank_transfer"  # For enterprise

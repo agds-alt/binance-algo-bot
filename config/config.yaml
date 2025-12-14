@@ -1,0 +1,233 @@
+# ============================================================================
+# BINANCE FUTURES ALGO BOT - CONFIGURATION
+# Based on complete system specification
+# ============================================================================
+
+# Exchange Configuration
+exchange:
+  name: "binance_futures"
+  testnet: true  # Set to false for live trading
+  api_key: "${BINANCE_API_KEY}"
+  api_secret: "${BINANCE_SECRET_KEY}"
+
+# Trading Configuration
+trading:
+  symbol: "BTC/USDT"
+  initial_capital: 1000  # USD
+  mode: "paper"  # paper | testnet | live
+
+# ============================================================================
+# RISK MANAGEMENT - HARD LIMITS (CANNOT BE OVERRIDDEN)
+# ============================================================================
+risk_management:
+  # Capital Management
+  max_portfolio_risk_per_trade: 1.0  # % - Max loss per single trade
+  max_daily_drawdown: 5.0  # % - Stop trading if loss 5% in a day
+  max_total_drawdown: 15.0  # % - Stop completely if loss 15% from initial
+  max_concurrent_positions: 3  # Maximum 3 positions at once
+  max_leverage: 10  # Maximum leverage (recommend 3-5x)
+
+  # Position Sizing
+  min_position_size: 10  # USD - Minimum position
+  max_position_size: 10.0  # % - Max 10% capital per position
+  max_allocation_per_pair: 15.0  # % - Max allocation for 1 pair
+
+  # Stop Loss Rules
+  mandatory_stop_loss: true  # REQUIRED on every trade
+  max_stop_loss_percent: 2.0  # % - SL cannot be more than 2%
+  trailing_stop_activation: 1.5  # % - Activate trailing after 1.5% profit
+  trailing_stop_callback: 0.5  # % - Trailing callback rate
+
+  # Take Profit Rules
+  min_risk_reward_ratio: 1.5  # Minimum R:R = 1:1.5
+  partial_tp_enabled: true
+  tp_levels: [50, 30, 20]  # % - Take profit levels
+  tp_ratios: [1.5, 2.5, 4.0]  # R:R for each level
+
+# ============================================================================
+# TRADING SESSION RULES
+# ============================================================================
+session_control:
+  max_trades_per_day: 10
+  max_consecutive_losses: 3  # Stop after 3 losses in a row
+  cooldown_after_loss_streak: 14400  # seconds (4 hours)
+  forced_daily_review: true  # Review before next day
+
+# Blackout Periods
+blackout_periods:
+  high_impact_news:
+    enabled: true
+    action: "no_new_positions"
+    buffer_minutes: 30  # 30 min before/after
+  weekend:
+    enabled: true
+    action: "close_all_or_tight_sl"
+  funding_rate:
+    enabled: true
+    action: "evaluate_position"
+
+# ============================================================================
+# ENTRY RULES & CONDITIONS
+# ============================================================================
+entry_rules:
+  required_confirmations: 5  # Minimum 5 out of 6 confirmations
+
+  # Technical Filters
+  technical_filters:
+    trend_alignment: true  # Must align with higher timeframe
+    volume_confirmation: true  # Volume must be above average
+    no_divergence: true  # No bearish/bullish divergence
+
+  # Market Structure
+  market_structure:
+    clear_support_resistance: true
+    no_ranging_market: true  # Avoid sideways markets
+    atr_filter_multiplier: 1.5  # ATR > 1.5x average
+
+  # Timing Filters
+  timing_filters:
+    not_near_major_news: true
+    session_overlap_preferred: true  # Prefer London/NY overlap
+    funding_rate_favorable: true
+
+  # Prohibited Entry Conditions
+  prohibited_conditions:
+    - "drawdown_today > 3%"
+    - "consecutive_losses >= 2"
+    - "near_candle_close_4h"  # 15 min before/after 4H close
+    - "spread > 0.1%"
+    - "open_interest_anomaly"
+
+# ============================================================================
+# EXIT RULES
+# ============================================================================
+exit_rules:
+  # Mandatory Exits
+  mandatory:
+    stop_loss_hit: "immediate"  # No override
+    max_hold_time_swing: 172800  # 48 hours for swing trades
+    max_hold_time_scalp: 14400  # 4 hours for scalp trades
+    daily_target_reached: "close_all_stop_trading"
+
+  # Profit Protection
+  profit_protection:
+    breakeven_move_after: 1.0  # R - Move SL to entry after +1R
+    trailing_activation_after: 1.5  # R - Activate trailing after +1.5R
+    partial_exits: true  # Use tp_levels from risk_management
+
+  # Emergency Exits
+  emergency:
+    flash_crash_detected: "close_50_percent"
+    abnormal_volume_spike: "tighten_sl_to_0.5_percent"
+    exchange_issues: "close_all_positions"
+
+# ============================================================================
+# TECHNICAL ANALYSIS SETTINGS
+# ============================================================================
+technical_analysis:
+  # Timeframes
+  timeframes:
+    primary: "15m"  # Primary trading timeframe
+    secondary: "1h"  # Secondary confirmation
+    higher: "4h"  # Higher timeframe for trend
+
+  # Indicators
+  indicators:
+    # Trend
+    ema_fast: 9
+    ema_slow: 21
+    ema_trend: 50
+
+    # Momentum
+    rsi_period: 14
+    rsi_overbought: 70
+    rsi_oversold: 30
+
+    macd_fast: 12
+    macd_slow: 26
+    macd_signal: 9
+
+    # Volatility
+    atr_period: 14
+    bb_period: 20
+    bb_std: 2
+
+    # Volume
+    volume_ma_period: 20
+    volume_threshold_multiplier: 1.5
+
+# ============================================================================
+# MONITORING & ALERTS
+# ============================================================================
+monitoring:
+  # Telegram Configuration
+  telegram:
+    enabled: true
+    bot_token: "${TELEGRAM_BOT_TOKEN}"
+    chat_id: "${TELEGRAM_CHAT_ID}"
+
+  # Alert Triggers
+  alerts:
+    critical:
+      - "drawdown > 10%"
+      - "3 consecutive losses"
+      - "no stop loss on open position"
+      - "api connection lost"
+
+    warning:
+      - "drawdown > 5%"
+      - "2 consecutive losses"
+      - "position approaching liquidation"
+      - "high funding rate against position"
+
+    info:
+      - "trade executed"
+      - "tp level hit"
+      - "sl moved to breakeven"
+
+  # Logging
+  logging:
+    level: "INFO"  # DEBUG | INFO | WARNING | ERROR | CRITICAL
+    file_enabled: true
+    console_enabled: true
+    max_file_size_mb: 10
+    backup_count: 5
+
+# ============================================================================
+# OVERRIDE PROTECTIONS
+# ============================================================================
+override_protections:
+  enabled: true
+  strict_mode: true  # Cannot be disabled in production
+
+  prohibited_actions:
+    - "trade_without_stop_loss"
+    - "leverage_above_10x"
+    - "risk_above_2_percent"
+    - "override_daily_drawdown"
+    - "trade_during_loss_streak"
+    - "all_in_position"
+    - "martingale_averaging"
+    - "trade_unstable_connection"
+
+  override_response: "Safety rule ini tidak bisa di-override. Rule ini melindungi capital Anda dari catastrophic loss."
+
+# ============================================================================
+# DATABASE & PERSISTENCE
+# ============================================================================
+database:
+  type: "sqlite"
+  path: "data/trading_bot.db"
+  backup_enabled: true
+  backup_interval_hours: 24
+
+# ============================================================================
+# PERFORMANCE & OPTIMIZATION
+# ============================================================================
+performance:
+  api_rate_limit: true
+  max_requests_per_minute: 1200
+  cache_market_data: true
+  cache_ttl_seconds: 5
+  parallel_analysis: true
+  max_workers: 4

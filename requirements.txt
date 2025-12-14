@@ -1,0 +1,47 @@
+# Binance Algo Bot - Complete Dependencies
+
+# Web Dashboard
+streamlit>=1.29.0
+plotly>=5.18.0
+
+# HTTP Client & Async
+httpx>=0.25.0
+aiohttp>=3.9.1
+
+# Environment & Config
+python-dotenv>=1.0.0
+pyyaml>=6.0.1
+
+# Logging
+loguru>=0.7.2
+colorlog>=6.8.0
+
+# Data Processing & Analysis
+pandas>=2.1.4
+numpy>=1.26.2
+
+# Technical Analysis
+ta>=0.11.0
+# pandas-ta>=0.3.14b0  # Optional - using ta library instead
+
+# Notifications
+python-telegram-bot>=20.7
+
+# Database & Storage
+sqlalchemy>=2.0.23
+
+# Payment Processing
+stripe>=7.9.0
+
+# Utilities
+python-dateutil>=2.8.2
+pytz>=2023.3
+requests>=2.31.0
+rich>=13.7.0
+
+# Type Hints
+typing-extensions>=4.8.0
+
+# Testing (Development)
+pytest>=7.4.3
+pytest-asyncio>=0.21.1
