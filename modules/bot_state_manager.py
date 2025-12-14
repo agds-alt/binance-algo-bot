@@ -73,6 +73,11 @@ class BotStats:
     peak_balance: float = 0.0
     drawdown: float = 0.0
     drawdown_percent: float = 0.0
+    # Additional metrics
+    avg_win: float = 0.0
+    avg_loss: float = 0.0
+    best_trade: float = 0.0
+    worst_trade: float = 0.0
 
 
 class BotStateManager:
@@ -262,6 +267,15 @@ class BotStateManager:
         drawdown = 0  # TODO: Calculate properly
         drawdown_percent = 0
 
+        # Calculate avg win/loss and best/worst trades
+        winning_pnls = [t.pnl for t in trades if t.pnl > 0]
+        losing_pnls = [t.pnl for t in trades if t.pnl < 0]
+
+        avg_win = sum(winning_pnls) / len(winning_pnls) if winning_pnls else 0
+        avg_loss = sum(losing_pnls) / len(losing_pnls) if losing_pnls else 0
+        best_trade = max([t.pnl for t in trades]) if trades else 0
+        worst_trade = min([t.pnl for t in trades]) if trades else 0
+
         stats = BotStats(
             total_trades=total_trades,
             winning_trades=winning_trades,
@@ -275,7 +289,11 @@ class BotStateManager:
             current_balance=current_balance,
             peak_balance=peak_balance,
             drawdown=drawdown,
-            drawdown_percent=drawdown_percent
+            drawdown_percent=drawdown_percent,
+            avg_win=avg_win,
+            avg_loss=avg_loss,
+            best_trade=best_trade,
+            worst_trade=worst_trade
         )
 
         self.update_stats(stats)
