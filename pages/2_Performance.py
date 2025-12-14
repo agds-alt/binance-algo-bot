@@ -1,6 +1,6 @@
 """
 Performance Dashboard
-Charts, metrics, and analytics
+Charts, metrics, and analytics - REAL DATA
 """
 
 import streamlit as st
@@ -9,10 +9,21 @@ import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime, timedelta
 import numpy as np
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from modules.bot_state_manager import get_bot_state_manager
 
 st.set_page_config(page_title="Performance", page_icon="💰", layout="wide")
 
 st.title("💰 Performance Dashboard")
+
+# Initialize state manager
+state_manager = get_bot_state_manager()
+stats = state_manager.get_stats()
+bot_state = state_manager.get_bot_state()
+trades = state_manager.get_trades(limit=1000)
 
 # Time period selector
 col1, col2, col3 = st.columns([2, 1, 1])
@@ -26,7 +37,10 @@ with col1:
 
 with col2:
     if st.button("📊 Generate Report", use_container_width=True):
-        st.info("Report generation available in PRO tier")
+        if st.session_state.get('tier', 'free') == 'free':
+            st.info("Report generation available in PRO tier")
+        else:
+            st.info("Report generation coming soon")
 
 with col3:
     if st.button("🔄 Refresh", use_container_width=True):
@@ -34,25 +48,37 @@ with col3:
 
 st.markdown("---")
 
-# Key Performance Metrics
+# Key Performance Metrics - REAL DATA
 st.markdown("### 📊 Key Metrics")
 
 col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
-    st.metric("Total P&L", "$0.00", "0%", help="Total profit/loss")
+    total_pnl_pct = stats.total_pnl_percent
+    st.metric("Total P&L", f"${stats.total_pnl:+,.2f}", f"{total_pnl_pct:+.2f}%", help="Total profit/loss")
 
 with col2:
-    st.metric("Win Rate", "0%", help="Percentage of winning trades")
+    st.metric("Win Rate", f"{stats.win_rate:.1f}%", help="Percentage of winning trades")
 
 with col3:
-    st.metric("Profit Factor", "0.00", help="Gross profit / Gross loss")
+    avg_win = stats.avg_win if stats.avg_win > 0 else 0
+    avg_loss = stats.avg_loss if stats.avg_loss < 0 else 0
+    profit_factor = abs(avg_win / avg_loss) if avg_loss != 0 else 0
+    st.metric("Profit Factor", f"{profit_factor:.2f}", help="Gross profit / Gross loss")
 
 with col4:
-    st.metric("Total Trades", "0", help="Number of completed trades")
+    st.metric("Total Trades", f"{stats.total_trades}", help="Number of completed trades")
 
 with col5:
-    st.metric("Sharpe Ratio", "0.00", help="Risk-adjusted returns")
+    # Simplified Sharpe-like metric
+    if trades and len(trades) > 1:
+        returns = [t.pnl_percent for t in trades]
+        avg_return = np.mean(returns)
+        std_return = np.std(returns)
+        sharpe = (avg_return / std_return) if std_return > 0 else 0
+        st.metric("Sharpe Ratio", f"{sharpe:.2f}", help="Risk-adjusted returns")
+    else:
+        st.metric("Sharpe Ratio", "0.00", help="Need more trades")
 
 st.markdown("---")
 
@@ -62,24 +88,34 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown("### 📈 Equity Curve")
 
-    # Mock equity curve
-    if st.session_state.get('tier', 'free') == 'free':
-        st.info("📊 Equity curve available after first trades. Start with paper trading!")
+    if not trades:
+        st.info("📊 Equity curve available after first trades. Run test_trading.py or start live trading!")
     else:
-        dates = pd.date_range(start=datetime.now() - timedelta(days=30), periods=30, freq='D')
-        equity = 1000 + np.cumsum(np.random.randn(30) * 50)
+        # Build equity curve from trades
+        sorted_trades = sorted(trades, key=lambda t: t.exit_time)
+
+        initial_capital = bot_state.capital if bot_state.capital > 0 else 10000
+        equity = [initial_capital]
+        dates = [datetime.fromisoformat(sorted_trades[0].entry_time)]
+
+        running_capital = initial_capital
+        for trade in sorted_trades:
+            running_capital += trade.pnl
+            equity.append(running_capital)
+            dates.append(datetime.fromisoformat(trade.exit_time))
 
         fig = go.Figure()
         fig.add_trace(go.Scatter(
             x=dates,
             y=equity,
-            mode='lines',
+            mode='lines+markers',
             name='Equity',
             fill='tozeroy',
-            line=dict(color='#1f77b4', width=2)
+            line=dict(color='#1f77b4', width=2),
+            marker=dict(size=6)
         ))
 
-        fig.add_hline(y=1000, line_dash="dash", line_color="gray", annotation_text="Initial Capital")
+        fig.add_hline(y=initial_capital, line_dash="dash", line_color="gray", annotation_text=f"Initial: ${initial_capital:,.0f}")
 
         fig.update_layout(
             height=350,
@@ -95,20 +131,29 @@ with col1:
 with col2:
     st.markdown("### 📊 Daily P&L")
 
-    if st.session_state.get('tier', 'free') == 'free':
-        st.info("📊 Daily P&L tracking available in PRO tier")
+    if not trades:
+        st.info("📊 Daily P&L tracking will appear after trades")
     else:
-        dates = pd.date_range(start=datetime.now() - timedelta(days=30), periods=30, freq='D')
-        daily_pnl = np.random.randn(30) * 50
+        # Group trades by day
+        daily_pnl = {}
+        for trade in trades:
+            day = datetime.fromisoformat(trade.exit_time).date()
+            if day not in daily_pnl:
+                daily_pnl[day] = 0
+            daily_pnl[day] += trade.pnl
 
-        colors = ['green' if x > 0 else 'red' for x in daily_pnl]
+        dates = sorted(daily_pnl.keys())
+        pnl_values = [daily_pnl[d] for d in dates]
+        colors = ['green' if x > 0 else 'red' for x in pnl_values]
 
         fig = go.Figure()
         fig.add_trace(go.Bar(
             x=dates,
-            y=daily_pnl,
+            y=pnl_values,
             marker_color=colors,
-            name='Daily P&L'
+            name='Daily P&L',
+            text=[f"${x:+.0f}" for x in pnl_values],
+            textposition='outside'
         ))
 
         fig.update_layout(
@@ -128,18 +173,27 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown("### 🎯 Win Rate by Pair")
 
-    if st.session_state.get('tier', 'free') == 'free':
-        st.warning("⚠️ Advanced analytics require PRO tier")
+    if not trades:
+        st.info("⚠️ Analytics will appear after trades")
     else:
-        pairs = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT"]
-        win_rates = [65, 58, 72, 61]
+        # Calculate win rate per pair
+        pair_stats = {}
+        for trade in trades:
+            if trade.symbol not in pair_stats:
+                pair_stats[trade.symbol] = {'wins': 0, 'total': 0}
+            pair_stats[trade.symbol]['total'] += 1
+            if trade.pnl > 0:
+                pair_stats[trade.symbol]['wins'] += 1
+
+        pairs = list(pair_stats.keys())
+        win_rates = [(pair_stats[p]['wins'] / pair_stats[p]['total'] * 100) for p in pairs]
 
         fig = go.Figure()
         fig.add_trace(go.Bar(
             x=pairs,
             y=win_rates,
             marker_color='#1f77b4',
-            text=[f"{x}%" for x in win_rates],
+            text=[f"{x:.1f}%" for x in win_rates],
             textposition='outside'
         ))
 
@@ -157,11 +211,25 @@ with col1:
 with col2:
     st.markdown("### 📉 Drawdown")
 
-    if st.session_state.get('tier', 'free') == 'free':
-        st.warning("⚠️ Drawdown tracking requires PRO tier")
+    if not trades:
+        st.info("⚠️ Drawdown tracking will appear after trades")
     else:
-        dates = pd.date_range(start=datetime.now() - timedelta(days=30), periods=30, freq='D')
-        drawdown = np.abs(np.minimum(np.cumsum(np.random.randn(30) * 2), 0))
+        # Calculate running drawdown
+        sorted_trades = sorted(trades, key=lambda t: t.exit_time)
+
+        initial_capital = bot_state.capital if bot_state.capital > 0 else 10000
+        equity = initial_capital
+        peak = initial_capital
+        drawdown = [0]
+        dates = [datetime.fromisoformat(sorted_trades[0].entry_time)]
+
+        for trade in sorted_trades:
+            equity += trade.pnl
+            if equity > peak:
+                peak = equity
+            dd_pct = ((peak - equity) / peak * 100) if peak > 0 else 0
+            drawdown.append(dd_pct)
+            dates.append(datetime.fromisoformat(trade.exit_time))
 
         fig = go.Figure()
         fig.add_trace(go.Scatter(
@@ -189,7 +257,7 @@ with col2:
 
 st.markdown("---")
 
-# Statistics Table
+# Statistics Table - REAL DATA
 st.markdown("### 📋 Detailed Statistics")
 
 col1, col2 = st.columns(2)
@@ -210,15 +278,15 @@ with col1:
             "Profit Factor",
         ],
         "Value": [
-            "0",
-            "0",
-            "0",
-            "0%",
-            "$0.00",
-            "$0.00",
-            "$0.00",
-            "$0.00",
-            "0.00",
+            f"{stats.total_trades}",
+            f"{stats.winning_trades}",
+            f"{stats.losing_trades}",
+            f"{stats.win_rate:.1f}%",
+            f"${stats.avg_win:,.2f}" if stats.avg_win > 0 else "$0.00",
+            f"${stats.avg_loss:,.2f}" if stats.avg_loss < 0 else "$0.00",
+            f"${stats.best_trade:,.2f}" if stats.best_trade else "$0.00",
+            f"${stats.worst_trade:,.2f}" if stats.worst_trade else "$0.00",
+            f"{profit_factor:.2f}",
         ]
     }
 
@@ -227,49 +295,62 @@ with col1:
 with col2:
     st.markdown("#### Risk Metrics")
 
+    # Calculate from real data
+    max_dd = max(drawdown) if trades else 0
+    current_dd = drawdown[-1] if drawdown else 0
+
+    # Calculate avg R-multiple
+    avg_r = np.mean([t.r_multiple for t in trades]) if trades else 0
+
+    # Calculate expectancy
+    expectancy = stats.avg_win * (stats.win_rate/100) + stats.avg_loss * (1 - stats.win_rate/100) if trades else 0
+
     risk_data = {
         "Metric": [
             "Max Drawdown",
             "Current Drawdown",
             "Sharpe Ratio",
-            "Sortino Ratio",
-            "Calmar Ratio",
-            "Recovery Factor",
-            "Risk/Reward Avg",
+            "Avg R-Multiple",
             "Expectancy",
-            "Consecutive Wins/Losses",
+            "Today P&L",
+            "Today Trades",
+            "Signals Today",
         ],
         "Value": [
-            "0%",
-            "0%",
-            "0.00",
-            "0.00",
-            "0.00",
-            "0.00",
-            "0.00",
-            "$0.00",
-            "0/0",
+            f"{max_dd:.2f}%",
+            f"{current_dd:.2f}%",
+            f"{sharpe:.2f}" if trades and len(trades) > 1 else "0.00",
+            f"{avg_r:.2f}R",
+            f"${expectancy:+,.2f}",
+            f"${stats.today_pnl:+,.2f}",
+            f"{stats.today_trades}",
+            f"{stats.signals_today}",
         ]
     }
 
     st.dataframe(pd.DataFrame(risk_data), use_container_width=True, hide_index=True)
 
-# Monthly Performance
-st.markdown("---")
-st.markdown("### 📅 Monthly Performance")
+# Monthly Performance (if enough data)
+if trades and len(trades) > 5:
+    st.markdown("---")
+    st.markdown("### 📅 Monthly Performance")
 
-if st.session_state.get('tier', 'free') != 'premium':
-    st.info("📊 Monthly heatmap available in PREMIUM tier")
-else:
-    # Mock monthly heatmap
-    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    returns = np.random.randn(12) * 5
+    # Group by month
+    monthly_pnl = {}
+    for trade in trades:
+        month = datetime.fromisoformat(trade.exit_time).strftime("%Y-%m")
+        if month not in monthly_pnl:
+            monthly_pnl[month] = 0
+        monthly_pnl[month] += trade.pnl
+
+    months = sorted(monthly_pnl.keys())
+    returns = [monthly_pnl[m] for m in months]
 
     fig = go.Figure(data=go.Bar(
         x=months,
         y=returns,
         marker_color=['green' if x > 0 else 'red' for x in returns],
-        text=[f"{x:.1f}%" for x in returns],
+        text=[f"${x:+,.0f}" for x in returns],
         textposition='outside'
     ))
 
@@ -277,7 +358,7 @@ else:
         height=300,
         margin=dict(l=0, r=0, t=30, b=0),
         xaxis_title="Month",
-        yaxis_title="Return (%)",
+        yaxis_title="Return ($)",
         showlegend=False
     )
 

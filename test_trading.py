@@ -301,7 +301,7 @@ class TestTradingBot:
 async def main():
     """Main test function"""
     # Initialize test bot
-    bot = TestTradingBot(initial_capital=10000, symbol="BTCUSDT")
+    bot = TestTradingBot(initial_capital=10000, symbol="SOLUSDT")
 
     # Start bot state
     state_manager = get_bot_state_manager()
