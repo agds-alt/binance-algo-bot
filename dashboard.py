@@ -231,10 +231,7 @@ with col1:
 with col2:
     start_disabled = st.session_state.tier == 'free'
     if st.button("▶️ Start Trading", disabled=start_disabled, use_container_width=True):
-        if st.session_state.tier == 'free':
-            st.error("Live trading requires PRO tier!")
-        else:
-            st.info("Starting trading bot...")
+        st.switch_page("pages/7_Live_Trading.py")
 
 with col3:
     if st.button("📊 View Performance", use_container_width=True):
