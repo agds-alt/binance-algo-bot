@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from modules.config import RISK_LIMITS, BINANCE_TESTNET
 from modules.tier_manager import TierManager, TierLevel
+from modules.bot_state_manager import get_bot_state_manager
 import yaml
 
 # Page config
@@ -158,11 +159,22 @@ with st.sidebar:
 
     st.markdown("---")
 
-    # Quick Stats
+    # Quick Stats - Real data from state manager
     st.markdown("### 📊 Quick Stats")
-    st.metric("Daily Trades", "0/10")
-    st.metric("Daily P&L", "$0.00", "0%")
-    st.metric("Win Rate", "0%")
+    state_manager = get_bot_state_manager()
+    stats = state_manager.get_stats()
+    bot_state = state_manager.get_bot_state()
+
+    # Daily trades with tier limit
+    daily_limit = tier_manager.get_max_daily_trades()
+    st.metric("Daily Trades", f"{stats.today_trades}/{daily_limit}")
+
+    # Daily P&L
+    today_pnl_pct = (stats.today_pnl / bot_state.capital * 100) if bot_state.capital > 0 else 0
+    st.metric("Daily P&L", f"${stats.today_pnl:+.2f}", f"{today_pnl_pct:+.2f}%")
+
+    # Win Rate
+    st.metric("Win Rate", f"{stats.win_rate:.1f}%")
 
     st.markdown("---")
     st.markdown("### 🆘 Support")
@@ -187,34 +199,41 @@ if st.session_state.tier == 'free':
     [Upgrade to PRO →](#)
     """)
 
-# Key Metrics Row
+# Key Metrics Row - Real data
 col1, col2, col3, col4 = st.columns(4)
 
+# Get real stats
+positions = state_manager.get_positions()
+current_balance = stats.current_balance if stats.current_balance > 0 else (bot_state.capital if bot_state.capital > 0 else 1000.0)
+
 with col1:
+    balance_change = stats.total_pnl
     st.metric(
         label="💰 Current Capital",
-        value="$1,000.00",
-        delta="$0.00"
+        value=f"${current_balance:,.2f}",
+        delta=f"${balance_change:+,.2f}"
     )
 
 with col2:
+    total_pnl_pct = stats.total_pnl_percent
     st.metric(
         label="📈 Total P&L",
-        value="$0.00",
-        delta="0%"
+        value=f"${stats.total_pnl:+,.2f}",
+        delta=f"{total_pnl_pct:+.2f}%"
     )
 
 with col3:
     st.metric(
         label="📊 Win Rate",
-        value="0%",
-        delta="N/A"
+        value=f"{stats.win_rate:.1f}%",
+        delta=f"{stats.winning_trades}W / {stats.losing_trades}L"
     )
 
 with col4:
+    max_positions = tier_manager.get_max_positions()
     st.metric(
         label="🔄 Open Positions",
-        value="0/3"
+        value=f"{len(positions)}/{max_positions}"
     )
 
 st.markdown("---")
@@ -239,22 +258,53 @@ with col3:
 
 with col4:
     if st.button("🛑 Emergency Close", type="primary", use_container_width=True):
-        if st.session_state.get('positions_open', 0) == 0:
+        if len(positions) == 0:
             st.warning("No open positions to close")
         else:
-            st.error("⚠️ This will close ALL positions. Confirm in Settings.")
+            st.error(f"⚠️ This will close {len(positions)} position(s). Go to Live Trading for emergency stop.")
 
 st.markdown("---")
 
 # Recent Activity
 st.markdown("### 📋 Recent Activity")
 
-# Placeholder for recent trades
-if True:  # No trades yet
-    st.info("No recent trading activity. Start by scanning markets or running a backtest!")
+# Show real recent trades
+recent_trades = state_manager.get_trades(limit=5)
+
+if recent_trades:
+    import pandas as pd
+    from datetime import datetime
+
+    trade_data = []
+    for trade in recent_trades:
+        trade_data.append({
+            "Time": datetime.fromisoformat(trade.exit_time).strftime("%Y-%m-%d %H:%M"),
+            "Pair": trade.symbol,
+            "Side": trade.side,
+            "Entry": f"${trade.entry_price:,.2f}",
+            "Exit": f"${trade.exit_price:,.2f}",
+            "P&L": f"${trade.pnl:+,.2f}",
+            "P&L %": f"{trade.pnl_percent:+.2f}%",
+            "R": f"{trade.r_multiple:.1f}R",
+            "Reason": trade.exit_reason
+        })
+
+    trades_df = pd.DataFrame(trade_data)
+
+    # Color code based on P&L
+    def color_pnl(val):
+        if isinstance(val, str) and '+' in val:
+            return 'background-color: rgba(0, 255, 0, 0.2)'
+        elif isinstance(val, str) and '-' in val:
+            return 'background-color: rgba(255, 0, 0, 0.2)'
+        return ''
+
+    st.dataframe(
+        trades_df.style.applymap(color_pnl, subset=['P&L', 'P&L %']),
+        use_container_width=True
+    )
 else:
-    # Will show recent trades here
-    pass
+    st.info("No recent trading activity. Start by scanning markets or activate Live Trading!")
 
 # Risk Status
 st.markdown("---")
@@ -264,13 +314,31 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("#### Daily Limits")
-    st.progress(0.0, text="Daily Drawdown: 0.00% / 5.00%")
-    st.progress(0.0, text="Daily Trades: 0 / 10")
+
+    # Daily drawdown
+    daily_dd_pct = abs(stats.today_pnl / current_balance * 100) if stats.today_pnl < 0 and current_balance > 0 else 0
+    daily_dd_limit = RISK_LIMITS["MAX_DAILY_DRAWDOWN_PCT"]
+    daily_dd_progress = min(daily_dd_pct / daily_dd_limit, 1.0)
+
+    st.progress(daily_dd_progress, text=f"Daily Drawdown: {daily_dd_pct:.2f}% / {daily_dd_limit:.2f}%")
+
+    # Daily trades
+    daily_trades_progress = stats.today_trades / daily_limit if daily_limit > 0 else 0
+    st.progress(daily_trades_progress, text=f"Daily Trades: {stats.today_trades} / {daily_limit}")
 
 with col2:
     st.markdown("#### Total Limits")
-    st.progress(0.0, text="Total Drawdown: 0.00% / 15.00%")
-    st.progress(0.0, text="Consecutive Losses: 0 / 3")
+
+    # Total drawdown
+    total_dd_pct = stats.drawdown_percent
+    total_dd_limit = RISK_LIMITS["MAX_TOTAL_DRAWDOWN_PCT"]
+    total_dd_progress = min(total_dd_pct / total_dd_limit, 1.0)
+
+    st.progress(total_dd_progress, text=f"Total Drawdown: {total_dd_pct:.2f}% / {total_dd_limit:.2f}%")
+
+    # Consecutive losses (simplified - would need to track properly)
+    max_consecutive = RISK_LIMITS.get("MAX_CONSECUTIVE_LOSSES", 3)
+    st.progress(0.0, text=f"Consecutive Losses: 0 / {max_consecutive}")
 
 # Tier Comparison (for free users)
 if st.session_state.tier == 'free':

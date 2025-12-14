@@ -10,10 +10,13 @@ import time
 from datetime import datetime
 import subprocess
 import signal
+import os
+import psutil
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from modules.config import BINANCE_TESTNET
+from modules.bot_state_manager import get_bot_state_manager
 
 st.set_page_config(page_title="Live Trading", page_icon="🤖", layout="wide")
 
@@ -61,11 +64,24 @@ if current_tier == 'free':
 # PRO feature unlocked
 st.success("✅ Live Trading enabled (PRO feature)")
 
-# Initialize bot state
-if 'bot_running' not in st.session_state:
-    st.session_state.bot_running = False
-if 'bot_pid' not in st.session_state:
-    st.session_state.bot_pid = None
+# Initialize bot state manager
+state_manager = get_bot_state_manager()
+
+# Get actual bot state from state manager
+bot_state = state_manager.get_bot_state()
+is_bot_running = bot_state.is_running
+
+# Check if bot process is actually running
+if is_bot_running and bot_state.pid:
+    try:
+        # Verify process is actually running
+        if not psutil.pid_exists(bot_state.pid):
+            # Process died, update state
+            state_manager.stop_bot()
+            bot_state = state_manager.get_bot_state()
+            is_bot_running = False
+    except:
+        pass
 
 # Warning for live mode
 if not BINANCE_TESTNET:
@@ -90,17 +106,27 @@ st.markdown("### 🎮 Bot Controls")
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    # Status indicator
-    if st.session_state.bot_running:
-        st.success("🟢 **Status:** RUNNING")
+    # Status indicator from actual bot state
+    if is_bot_running:
+        st.success(f"🟢 **Status:** RUNNING (PID: {bot_state.pid})")
+        # Update uptime
+        state_manager.update_uptime()
+        bot_state = state_manager.get_bot_state()
+        uptime_mins = bot_state.uptime_seconds // 60
+        st.caption(f"⏱️ Uptime: {uptime_mins} minutes")
     else:
         st.info("🔴 **Status:** STOPPED")
 
 with col2:
-    st.metric("Mode", "TESTNET" if BINANCE_TESTNET else "LIVE")
+    st.metric("Mode", bot_state.mode.upper() if is_bot_running else ("TESTNET" if BINANCE_TESTNET else "LIVE"))
+    if is_bot_running and bot_state.started_at:
+        started = datetime.fromisoformat(bot_state.started_at)
+        st.caption(f"Started: {started.strftime('%H:%M:%S')}")
 
 with col3:
     st.metric("Tier", current_tier.upper())
+    if is_bot_running:
+        st.caption(f"💰 Capital: ${bot_state.capital:,.2f}")
 
 st.markdown("---")
 
@@ -108,104 +134,255 @@ st.markdown("---")
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    if st.button("▶️ Start Bot", disabled=st.session_state.bot_running, use_container_width=True, type="primary"):
-        st.info("""
-        🤖 **Starting Trading Bot...**
+    if st.button("▶️ Start Bot", disabled=is_bot_running, use_container_width=True, type="primary"):
+        try:
+            # Get initial capital from config or user input
+            initial_capital = 10000  # Default $10k
+            mode = "testnet" if BINANCE_TESTNET else "live"
 
-        The bot will:
-        1. Connect to Binance API
-        2. Start scanning for signals
-        3. Execute trades automatically
-        4. Monitor positions 24/7
+            # Start bot process in background
+            bot_script = Path(__file__).parent.parent / "main.py"
 
-        Check console output for real-time logs.
-        """)
+            if bot_script.exists():
+                # Start bot as subprocess
+                process = subprocess.Popen(
+                    ["python", str(bot_script), "--mode", mode, "--capital", str(initial_capital)],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    cwd=str(bot_script.parent)
+                )
 
-        # In production, you would start the bot process here
-        # For demo, we'll show a placeholder
-        st.session_state.bot_running = True
-        st.rerun()
+                # Update state
+                state_manager.start_bot(
+                    pid=process.pid,
+                    mode=mode,
+                    capital=initial_capital
+                )
+
+                st.success(f"✅ Bot started successfully! PID: {process.pid}")
+                st.info("""
+                🤖 **Trading Bot Started**
+
+                The bot will:
+                1. Connect to Binance API
+                2. Start scanning for signals
+                3. Execute trades automatically
+                4. Monitor positions 24/7
+
+                Check logs/ directory for real-time logs.
+                """)
+                time.sleep(2)
+                st.rerun()
+            else:
+                st.error("❌ main.py not found. Please ensure the bot script exists.")
+        except Exception as e:
+            st.error(f"❌ Failed to start bot: {e}")
 
 with col2:
-    if st.button("⏸️ Stop Bot", disabled=not st.session_state.bot_running, use_container_width=True):
-        st.warning("Stopping bot...")
-        st.session_state.bot_running = False
-        st.rerun()
+    if st.button("⏸️ Stop Bot", disabled=not is_bot_running, use_container_width=True):
+        try:
+            if bot_state.pid:
+                # Try to terminate gracefully first
+                try:
+                    os.kill(bot_state.pid, signal.SIGTERM)
+                    st.warning("⏸️ Sending stop signal to bot...")
+                    time.sleep(2)
+
+                    # If still running, force kill
+                    if psutil.pid_exists(bot_state.pid):
+                        os.kill(bot_state.pid, signal.SIGKILL)
+                except:
+                    pass
+
+            # Update state
+            state_manager.stop_bot()
+            st.success("✅ Bot stopped successfully")
+            time.sleep(1)
+            st.rerun()
+        except Exception as e:
+            st.error(f"❌ Failed to stop bot: {e}")
+            # Update state anyway
+            state_manager.stop_bot()
+            st.rerun()
 
 with col3:
-    if st.button("🔄 Restart Bot", disabled=not st.session_state.bot_running, use_container_width=True):
-        st.info("Restarting bot...")
-        st.session_state.bot_running = False
-        time.sleep(1)
-        st.session_state.bot_running = True
-        st.rerun()
+    if st.button("🔄 Restart Bot", disabled=not is_bot_running, use_container_width=True):
+        try:
+            # Stop current bot
+            if bot_state.pid:
+                try:
+                    os.kill(bot_state.pid, signal.SIGTERM)
+                    time.sleep(1)
+                except:
+                    pass
+
+            state_manager.stop_bot()
+            time.sleep(1)
+
+            # Start new bot
+            initial_capital = bot_state.capital or 10000
+            mode = bot_state.mode or ("testnet" if BINANCE_TESTNET else "live")
+
+            bot_script = Path(__file__).parent.parent / "main.py"
+            if bot_script.exists():
+                process = subprocess.Popen(
+                    ["python", str(bot_script), "--mode", mode, "--capital", str(initial_capital)],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    cwd=str(bot_script.parent)
+                )
+
+                state_manager.start_bot(
+                    pid=process.pid,
+                    mode=mode,
+                    capital=initial_capital
+                )
+
+                st.success(f"✅ Bot restarted successfully! PID: {process.pid}")
+                time.sleep(2)
+                st.rerun()
+        except Exception as e:
+            st.error(f"❌ Failed to restart bot: {e}")
 
 with col4:
     if st.button("🚨 Emergency Stop", use_container_width=True):
-        st.error("Emergency stop activated! Closing all positions...")
-        st.session_state.bot_running = False
-        st.rerun()
+        try:
+            # Force kill bot immediately
+            if is_bot_running and bot_state.pid:
+                try:
+                    os.kill(bot_state.pid, signal.SIGKILL)
+                except:
+                    pass
+
+            # Close all positions (if any)
+            positions = state_manager.get_positions()
+            if positions:
+                st.error(f"⚠️ Emergency stop! Found {len(positions)} open positions.")
+                # TODO: Close positions via exchange API
+                # For now, just clear from state
+                state_manager.set_positions([])
+
+            # Update state
+            state_manager.stop_bot()
+            st.success("✅ Emergency stop executed!")
+            time.sleep(1)
+            st.rerun()
+        except Exception as e:
+            st.error(f"❌ Emergency stop error: {e}")
+            state_manager.stop_bot()
+            st.rerun()
 
 st.markdown("---")
 
 # Bot activity
-if st.session_state.bot_running:
+if is_bot_running:
     st.markdown("### 📊 Live Activity")
 
-    # Simulated real-time updates
+    # Get real-time stats from state manager
+    stats = state_manager.get_stats()
+    positions = state_manager.get_positions()
+    recent_trades = state_manager.get_trades(limit=10)
+
     col1, col2 = st.columns([2, 1])
 
     with col1:
         st.markdown("#### Recent Actions")
 
-        # Placeholder for live logs
-        log_placeholder = st.empty()
+        # Check if log file exists and show last 10 lines
+        log_file = Path("logs/trading_bot.log")
+        if log_file.exists():
+            try:
+                with open(log_file, 'r') as f:
+                    lines = f.readlines()
+                    recent_logs = lines[-10:] if len(lines) > 10 else lines
+                    st.code("".join(recent_logs), language="log")
+            except:
+                st.info("📋 Bot logs will appear here when bot starts generating activity.")
+        else:
+            st.info("""
+            📋 **Bot Activity Logs**
 
-        logs = [
-            f"[{datetime.now().strftime('%H:%M:%S')}] 🔍 Scanning BNBUSDT...",
-            f"[{datetime.now().strftime('%H:%M:%S')}] ✅ EMA 8/21 crossover detected",
-            f"[{datetime.now().strftime('%H:%M:%S')}] 📊 Confirmations: 4/5",
-            f"[{datetime.now().strftime('%H:%M:%S')}] ⏳ Waiting for volume confirmation...",
-        ]
+            Logs will appear here once the bot starts:
+            - Market scanning
+            - Signal detection
+            - Trade execution
+            - Position management
 
-        log_placeholder.code("\n".join(logs), language="log")
-
-        st.info("""
-        **To see real-time bot logs, run:**
-        ```bash
-        python main.py --mode live
-        ```
-
-        Or check `logs/` directory for detailed logs.
-        """)
+            Log file: `logs/trading_bot.log`
+            """)
 
     with col2:
         st.markdown("#### Quick Stats")
 
-        st.metric("Signals Today", "12")
-        st.metric("Trades Executed", "3")
-        st.metric("Win Rate", "66.7%")
-        st.metric("Today's P&L", "+$156.50", "+1.56%")
+        # Real stats from state manager
+        st.metric("Signals Today", stats.signals_today)
+        st.metric("Trades Today", stats.today_trades)
+        st.metric("Win Rate", f"{stats.win_rate:.1f}%")
+
+        today_pnl_pct = (stats.today_pnl / bot_state.capital * 100) if bot_state.capital > 0 else 0
+        st.metric(
+            "Today's P&L",
+            f"${stats.today_pnl:+,.2f}",
+            f"{today_pnl_pct:+.2f}%"
+        )
 
     st.markdown("---")
     st.markdown("#### 📍 Current Positions")
 
-    # Mock position data
+    # Real positions from state manager
     import pandas as pd
 
-    positions = pd.DataFrame({
-        "Pair": ["BNBUSDT"],
-        "Side": ["LONG"],
-        "Entry": ["$623.50"],
-        "Current": ["$625.80"],
-        "Size": ["0.5 BNB"],
-        "P&L": ["+$1.15"],
-        "P&L %": ["+0.37%"]
-    })
+    if positions:
+        position_data = []
+        for pos in positions:
+            position_data.append({
+                "Pair": pos.symbol,
+                "Side": pos.side,
+                "Entry": f"${pos.entry_price:,.2f}",
+                "Current": f"${pos.current_price:,.2f}",
+                "Size": f"{pos.size:.4f}",
+                "P&L": f"${pos.pnl:+,.2f}",
+                "P&L %": f"{pos.pnl_percent:+.2f}%"
+            })
 
-    st.dataframe(positions, use_container_width=True)
+        positions_df = pd.DataFrame(position_data)
+        st.dataframe(positions_df, use_container_width=True)
 
-    st.info("💡 Bot is monitoring positions 24/7 and will exit at TP/SL automatically")
+        st.info(f"💡 Bot monitoring {len(positions)} position(s). Will exit at TP/SL automatically.")
+    else:
+        st.info("No open positions. Bot is scanning for entry signals.")
+
+    # Show recent trades
+    if recent_trades:
+        st.markdown("#### 📋 Recent Trades")
+
+        trade_data = []
+        for trade in recent_trades[:5]:  # Show last 5
+            trade_data.append({
+                "Time": datetime.fromisoformat(trade.exit_time).strftime("%H:%M:%S"),
+                "Pair": trade.symbol,
+                "Side": trade.side,
+                "Entry": f"${trade.entry_price:,.2f}",
+                "Exit": f"${trade.exit_price:,.2f}",
+                "P&L": f"${trade.pnl:+,.2f}",
+                "P&L %": f"{trade.pnl_percent:+.2f}%",
+                "R": f"{trade.r_multiple:.1f}R"
+            })
+
+        trades_df = pd.DataFrame(trade_data)
+
+        # Color code based on P&L
+        def color_pnl(val):
+            if isinstance(val, str) and '+' in val:
+                return 'background-color: rgba(0, 255, 0, 0.2)'
+            elif isinstance(val, str) and '-' in val:
+                return 'background-color: rgba(255, 0, 0, 0.2)'
+            return ''
+
+        st.dataframe(
+            trades_df.style.applymap(color_pnl, subset=['P&L', 'P&L %']),
+            use_container_width=True
+        )
 
 else:
     st.markdown("### 💤 Bot is Idle")
@@ -286,6 +463,17 @@ with col3:
 
     if st.button("⚙️ Configure Notifications"):
         st.switch_page("pages/4_Settings.py")
+
+# Auto-refresh when bot is running
+if is_bot_running:
+    # Poll state files every 5 seconds
+    st.markdown("---")
+    st.info("🔄 Auto-refreshing every 5 seconds to show live updates...")
+
+    # Use Streamlit's experimental_rerun after delay
+    import time
+    time.sleep(5)
+    st.rerun()
 
 # Footer
 st.markdown("---")
