@@ -1,6 +1,6 @@
 """
 Binance Algo Bot - Main Dashboard
-Production-grade Streamlit interface for members
+Production-grade Streamlit interface - OPTIMIZED LAYOUT
 """
 
 import streamlit as st
@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from modules.config import RISK_LIMITS, BINANCE_TESTNET
 from modules.tier_manager import TierManager, TierLevel
 from modules.bot_state_manager import get_bot_state_manager
+from datetime import datetime
 import yaml
 
 # Page config
@@ -24,39 +25,130 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
+# Enhanced Custom CSS - More Professional
 st.markdown("""
 <style>
-    .main-header {
-        font-size: 2.5rem;
-        font-weight: bold;
-        color: #1f77b4;
-        margin-bottom: 1rem;
+    /* Main container */
+    .main > div {
+        padding-top: 2rem;
     }
+
+    /* Headers */
+    .main-header {
+        font-size: 2.8rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+        letter-spacing: -1px;
+    }
+
+    .section-header {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #e5e7eb;
+    }
+
+    /* Metric cards */
     .metric-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         padding: 1.5rem;
-        border-radius: 10px;
+        border-radius: 12px;
         color: white;
-        margin-bottom: 1rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
     }
+
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+
+    /* Tier badges */
     .tier-badge {
         display: inline-block;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-weight: bold;
-        font-size: 0.9rem;
+        padding: 0.6rem 1.2rem;
+        border-radius: 25px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    .tier-free { background: #95a5a6; }
-    .tier-pro { background: #3498db; }
-    .tier-premium { background: #9b59b6; }
-    .tier-enterprise { background: #e74c3c; }
 
+    .tier-free {
+        background: linear-gradient(135deg, #6b7280, #9ca3af);
+        color: white;
+    }
+    .tier-pro {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+    }
+    .tier-premium {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        color: white;
+    }
+    .tier-enterprise {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+    }
+
+    /* Buttons */
     .stButton>button {
         width: 100%;
-        border-radius: 10px;
+        border-radius: 8px;
         height: 3rem;
-        font-weight: bold;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        transition: all 0.3s;
+    }
+
+    .stButton>button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+    }
+
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
+        color: #e5e7eb;
+    }
+
+    /* Info boxes */
+    .stAlert {
+        border-radius: 10px;
+        border-left: 4px solid #3b82f6;
+    }
+
+    /* Metrics */
+    [data-testid="stMetricValue"] {
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    /* Dividers */
+    hr {
+        margin: 2rem 0;
+        border: none;
+        border-top: 2px solid #e5e7eb;
+    }
+
+    /* Cards */
+    .info-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border: 1px solid #e5e7eb;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -102,18 +194,16 @@ except Exception as e:
     st.error(f"Error loading configuration: {e}")
     st.stop()
 
-# Sidebar
+# OPTIMIZED SIDEBAR
 with st.sidebar:
-    # Logo
+    # Logo & Title
     st.markdown("""
-    <div style="text-align: center; padding: 1rem;">
-        <h1 style="font-size: 4rem; margin: 0;">🤖</h1>
+    <div style="text-align: center; padding: 2rem 0 1rem 0;">
+        <div style="font-size: 4rem; margin-bottom: 0.5rem;">🤖</div>
+        <h2 style="color: white; margin: 0; font-weight: 700; font-size: 1.4rem;">Binance Algo Bot</h2>
+        <p style="color: #9ca3af; margin-top: 0.5rem; font-size: 0.85rem;">v1.0.0 • {}</p>
     </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("### 🤖 Binance Algo Bot")
-    st.markdown(f"**Version:** 1.0.0")
-    st.markdown(f"**Mode:** {'🧪 TESTNET' if BINANCE_TESTNET else '🔴 LIVE'}")
+    """.format('🧪 TESTNET' if BINANCE_TESTNET else '🔴 LIVE'), unsafe_allow_html=True)
 
     st.markdown("---")
 
@@ -127,35 +217,20 @@ with st.sidebar:
     }
 
     st.markdown(f"""
-    <div class="tier-badge {tier_colors[st.session_state.tier]}">
-        {tier_name} TIER
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+        <div class="tier-badge {tier_colors[st.session_state.tier]}">
+            {tier_name}
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
     # License Status
     if st.session_state.license_active:
-        st.success("✅ License Active")
+        st.success("✅ License Active", icon="🔐")
     else:
-        st.warning("⚠️ No License")
-        if st.button("🔐 Activate License"):
+        st.warning("⚠️ Free Tier", icon="🆓")
+        if st.button("🚀 Upgrade Now", use_container_width=True, type="primary"):
             st.switch_page("pages/5_License.py")
-
-    st.markdown("---")
-
-    # Navigation
-    st.markdown("### 📊 Navigation")
-
-    pages = {
-        "🏠 Dashboard": "dashboard.py",
-        "📈 Market Analysis": "pages/1_Market_Analysis.py",
-        "💰 Performance": "pages/2_Performance.py",
-        "📋 Trade History": "pages/3_Trade_History.py",
-        "⚙️ Settings": "pages/4_Settings.py",
-        "🔐 License": "pages/5_License.py",
-    }
-
-    for label, _ in pages.items():
-        st.markdown(f"**{label}**")
 
     st.markdown("---")
 
@@ -167,51 +242,96 @@ with st.sidebar:
 
     # Daily trades with tier limit
     daily_limit = tier_manager.get_max_daily_trades()
-    st.metric("Daily Trades", f"{stats.today_trades}/{daily_limit}")
+    trades_color = "🟢" if stats.today_trades < daily_limit else "🔴"
+    st.metric(
+        "Trades Today",
+        f"{stats.today_trades}/{daily_limit}",
+        help="Daily trades executed"
+    )
 
     # Daily P&L
     today_pnl_pct = (stats.today_pnl / bot_state.capital * 100) if bot_state.capital > 0 else 0
-    st.metric("Daily P&L", f"${stats.today_pnl:+.2f}", f"{today_pnl_pct:+.2f}%")
+    pnl_icon = "📈" if stats.today_pnl >= 0 else "📉"
+    st.metric(
+        "Today's P&L",
+        f"${stats.today_pnl:+,.2f}",
+        f"{today_pnl_pct:+.2f}%",
+        help="Profit/Loss today"
+    )
 
     # Win Rate
-    st.metric("Win Rate", f"{stats.win_rate:.1f}%")
+    win_icon = "🎯" if stats.win_rate >= 60 else "⚠️"
+    st.metric(
+        "Win Rate",
+        f"{stats.win_rate:.1f}%",
+        help="Percentage of winning trades"
+    )
+
+    # Total P&L
+    st.metric(
+        "Total P&L",
+        f"${stats.total_pnl:+,.2f}",
+        help="All-time profit/loss"
+    )
 
     st.markdown("---")
+
+    # Bot Status
+    st.markdown("### 🤖 Bot Status")
+    if bot_state.is_running:
+        st.success("🟢 **RUNNING**", icon="✅")
+        uptime_mins = bot_state.uptime_seconds // 60
+        st.caption(f"⏱️ Uptime: {uptime_mins}m")
+    else:
+        st.info("⚪ **STOPPED**", icon="⏸️")
+        st.caption("Bot is idle")
+
+    st.markdown("---")
+
+    # Support
     st.markdown("### 🆘 Support")
-    st.markdown("📧 support@algobot.com")
-    st.markdown("💬 @algobot_support")
+    st.markdown("""
+    <div style="font-size: 0.85rem; color: #9ca3af;">
+        📧 support@algobot.com<br>
+        💬 @algobot_support<br>
+        📚 <a href="#" style="color: #3b82f6;">Documentation</a>
+    </div>
+    """, unsafe_allow_html=True)
 
-# Main Content
+# MAIN CONTENT
 st.markdown('<div class="main-header">🤖 Binance Algo Trading Bot</div>', unsafe_allow_html=True)
+st.caption("Automated cryptocurrency trading with advanced risk management")
 
-# Welcome Message
+# Welcome/Upgrade Message for Free Users
 if st.session_state.tier == 'free':
     st.info("""
-    👋 **Welcome to FREE tier!**
+    **👋 Welcome to FREE tier!** You're currently on the FREE plan.
 
-    You're currently on the FREE plan. Upgrade to PRO to unlock:
-    - ✅ Live trading (currently paper trading only)
-    - ✅ Higher position limits ($100 → $5,000)
-    - ✅ More daily trades (3 → 20)
-    - ✅ Advanced strategies
-    - ✅ Backtesting
+    **Upgrade to PRO** to unlock:
+    • Live trading (currently paper only) • Higher position limits ($100 → $5,000)
+    • More daily trades (3 → 20) • Advanced strategies • Backtesting & Analytics
 
-    [Upgrade to PRO →](#)
-    """)
+    [**🚀 Upgrade to PRO →**](#)
+    """, icon="🎁")
+
+st.markdown("---")
 
 # Key Metrics Row - Real data
+st.markdown('<div class="section-header">📊 Performance Overview</div>', unsafe_allow_html=True)
+
 col1, col2, col3, col4 = st.columns(4)
 
 # Get real stats
 positions = state_manager.get_positions()
-current_balance = stats.current_balance if stats.current_balance > 0 else (bot_state.capital if bot_state.capital > 0 else 1000.0)
+current_balance = stats.current_balance if stats.current_balance > 0 else (bot_state.capital if bot_state.capital > 0 else 10000.0)
 
 with col1:
     balance_change = stats.total_pnl
     st.metric(
         label="💰 Current Capital",
         value=f"${current_balance:,.2f}",
-        delta=f"${balance_change:+,.2f}"
+        delta=f"${balance_change:+,.2f}",
+        help="Total capital including P&L"
     )
 
 with col2:
@@ -219,74 +339,75 @@ with col2:
     st.metric(
         label="📈 Total P&L",
         value=f"${stats.total_pnl:+,.2f}",
-        delta=f"{total_pnl_pct:+.2f}%"
+        delta=f"{total_pnl_pct:+.2f}%",
+        help="All-time profit/loss"
     )
 
 with col3:
     st.metric(
-        label="📊 Win Rate",
+        label="🎯 Win Rate",
         value=f"{stats.win_rate:.1f}%",
-        delta=f"{stats.winning_trades}W / {stats.losing_trades}L"
+        delta=f"{stats.winning_trades}W / {stats.losing_trades}L",
+        help="Percentage of winning trades"
     )
 
 with col4:
     max_positions = tier_manager.get_max_positions()
+    pos_color = "normal" if len(positions) < max_positions else "inverse"
     st.metric(
         label="🔄 Open Positions",
-        value=f"{len(positions)}/{max_positions}"
+        value=f"{len(positions)}/{max_positions}",
+        help="Current vs maximum positions"
     )
 
 st.markdown("---")
 
 # Quick Actions
-st.markdown("### ⚡ Quick Actions")
+st.markdown('<div class="section-header">⚡ Quick Actions</div>', unsafe_allow_html=True)
 
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    if st.button("🔍 Scan Markets", use_container_width=True):
+    if st.button("🔍 **Scan Markets**", use_container_width=True):
         st.switch_page("pages/1_Market_Analysis.py")
 
 with col2:
     start_disabled = st.session_state.tier == 'free'
-    if st.button("▶️ Start Trading", disabled=start_disabled, use_container_width=True):
+    if st.button("▶️ **Start Trading**", disabled=start_disabled, use_container_width=True, type="primary"):
         st.switch_page("pages/7_Live_Trading.py")
+    if start_disabled:
+        st.caption("⚠️ PRO feature")
 
 with col3:
-    if st.button("📊 View Performance", use_container_width=True):
+    if st.button("📊 **View Performance**", use_container_width=True):
         st.switch_page("pages/2_Performance.py")
 
 with col4:
-    if st.button("🛑 Emergency Close", type="primary", use_container_width=True):
-        if len(positions) == 0:
-            st.warning("No open positions to close")
-        else:
-            st.error(f"⚠️ This will close {len(positions)} position(s). Go to Live Trading for emergency stop.")
+    if st.button("📋 **Trade History**", use_container_width=True):
+        st.switch_page("pages/3_Trade_History.py")
 
 st.markdown("---")
 
 # Recent Activity
-st.markdown("### 📋 Recent Activity")
+st.markdown('<div class="section-header">📋 Recent Activity</div>', unsafe_allow_html=True)
 
 # Show real recent trades
-recent_trades = state_manager.get_trades(limit=5)
+recent_trades = state_manager.get_trades(limit=10)
 
 if recent_trades:
     import pandas as pd
-    from datetime import datetime
 
     trade_data = []
-    for trade in recent_trades:
+    for trade in recent_trades[:5]:  # Show top 5
         trade_data.append({
-            "Time": datetime.fromisoformat(trade.exit_time).strftime("%Y-%m-%d %H:%M"),
-            "Pair": trade.symbol,
-            "Side": trade.side,
+            "Time": datetime.fromisoformat(trade.exit_time).strftime("%m/%d %H:%M"),
+            "Pair": trade.symbol.replace("USDT", ""),
+            "Side": f"{'🟢' if trade.side == 'LONG' else '🔴'} {trade.side}",
             "Entry": f"${trade.entry_price:,.2f}",
             "Exit": f"${trade.exit_price:,.2f}",
             "P&L": f"${trade.pnl:+,.2f}",
             "P&L %": f"{trade.pnl_percent:+.2f}%",
             "R": f"{trade.r_multiple:.1f}R",
-            "Reason": trade.exit_reason
         })
 
     trades_df = pd.DataFrame(trade_data)
@@ -294,21 +415,27 @@ if recent_trades:
     # Color code based on P&L
     def color_pnl(val):
         if isinstance(val, str) and '+' in val:
-            return 'background-color: rgba(0, 255, 0, 0.2)'
+            return 'background-color: rgba(34, 197, 94, 0.2); color: rgb(22, 163, 74); font-weight: 600'
         elif isinstance(val, str) and '-' in val:
-            return 'background-color: rgba(255, 0, 0, 0.2)'
+            return 'background-color: rgba(239, 68, 68, 0.2); color: rgb(220, 38, 38); font-weight: 600'
         return ''
 
     st.dataframe(
         trades_df.style.applymap(color_pnl, subset=['P&L', 'P&L %']),
-        use_container_width=True
+        use_container_width=True,
+        hide_index=True
     )
-else:
-    st.info("No recent trading activity. Start by scanning markets or activate Live Trading!")
 
-# Risk Status
+    # View all button
+    if st.button("📜 View All Trades", use_container_width=True):
+        st.switch_page("pages/3_Trade_History.py")
+else:
+    st.info("📭 No recent trading activity. Start by scanning markets or running a backtest!", icon="💡")
+
 st.markdown("---")
-st.markdown("### 🛡️ Risk Management Status")
+
+# Risk Management Status
+st.markdown('<div class="section-header">🛡️ Risk Management</div>', unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
@@ -317,67 +444,39 @@ with col1:
 
     # Daily drawdown
     daily_dd_pct = abs(stats.today_pnl / current_balance * 100) if stats.today_pnl < 0 and current_balance > 0 else 0
-    daily_dd_limit = RISK_LIMITS["MAX_DAILY_DRAWDOWN_PCT"]
+    daily_dd_limit = RISK_LIMITS.MAX_DAILY_DRAWDOWN * 100  # Convert to percentage
     daily_dd_progress = min(daily_dd_pct / daily_dd_limit, 1.0)
 
-    st.progress(daily_dd_progress, text=f"Daily Drawdown: {daily_dd_pct:.2f}% / {daily_dd_limit:.2f}%")
+    st.progress(daily_dd_progress, text=f"📉 Daily Drawdown: {daily_dd_pct:.2f}% / {daily_dd_limit:.2f}%")
 
     # Daily trades
-    daily_trades_progress = stats.today_trades / daily_limit if daily_limit > 0 else 0
-    st.progress(daily_trades_progress, text=f"Daily Trades: {stats.today_trades} / {daily_limit}")
+    daily_trades_progress = min(stats.today_trades / daily_limit, 1.0) if daily_limit > 0 else 0
+    st.progress(daily_trades_progress, text=f"🔄 Daily Trades: {stats.today_trades} / {daily_limit}")
 
 with col2:
     st.markdown("#### Total Limits")
 
     # Total drawdown
     total_dd_pct = stats.drawdown_percent
-    total_dd_limit = RISK_LIMITS["MAX_TOTAL_DRAWDOWN_PCT"]
+    total_dd_limit = RISK_LIMITS.MAX_TOTAL_DRAWDOWN * 100  # Convert to percentage
     total_dd_progress = min(total_dd_pct / total_dd_limit, 1.0)
 
-    st.progress(total_dd_progress, text=f"Total Drawdown: {total_dd_pct:.2f}% / {total_dd_limit:.2f}%")
+    st.progress(total_dd_progress, text=f"📊 Total Drawdown: {total_dd_pct:.2f}% / {total_dd_limit:.2f}%")
 
-    # Consecutive losses (simplified - would need to track properly)
-    max_consecutive = RISK_LIMITS.get("MAX_CONSECUTIVE_LOSSES", 3)
-    st.progress(0.0, text=f"Consecutive Losses: 0 / {max_consecutive}")
-
-# Tier Comparison (for free users)
-if st.session_state.tier == 'free':
-    st.markdown("---")
-    st.markdown("### 🚀 Upgrade to Unlock More")
-
-    tier_comparison = {
-        "Feature": ["Live Trading", "Max Position", "Daily Trades", "Concurrent Positions", "Trading Pairs", "Backtesting", "Support"],
-        "FREE": ["❌", "$100", "3", "1", "1 (BTC)", "❌", "Community"],
-        "PRO": ["✅", "$5,000", "20", "3", "5 pairs", "✅", "Priority"],
-        "PREMIUM": ["✅", "Unlimited", "Unlimited", "10", "All pairs", "✅", "VIP 24/7"],
-    }
-
-    st.table(tier_comparison)
-
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("**FREE**")
-        st.markdown("$0/month")
-        st.button("Current Plan", disabled=True, use_container_width=True)
-
-    with col2:
-        st.markdown("**PRO** ⭐")
-        st.markdown("$99/month")
-        if st.button("Upgrade to PRO", type="primary", use_container_width=True):
-            st.switch_page("pages/5_License.py")
-
-    with col3:
-        st.markdown("**PREMIUM**")
-        st.markdown("$249/month")
-        if st.button("Upgrade to PREMIUM", use_container_width=True):
-            st.switch_page("pages/5_License.py")
+    # Positions used
+    positions_progress = len(positions) / max_positions if max_positions > 0 else 0
+    st.progress(positions_progress, text=f"💼 Positions: {len(positions)} / {max_positions}")
 
 # Footer
 st.markdown("---")
 st.markdown("""
-<div style='text-align: center; color: #666; padding: 2rem;'>
-    <p><strong>⚠️ Risk Warning:</strong> Trading cryptocurrency involves substantial risk of loss.</p>
-    <p>Past performance is not indicative of future results.</p>
-    <p><small>© 2025 Binance Algo Bot. All rights reserved.</small></p>
+<div style='text-align: center; color: #6b7280; padding: 2rem 1rem;'>
+    <p style='font-weight: 600; margin-bottom: 0.5rem;'>⚠️ Risk Warning</p>
+    <p style='font-size: 0.85rem; margin-bottom: 1rem;'>
+        Trading cryptocurrency involves substantial risk of loss. Past performance is not indicative of future results.
+    </p>
+    <p style='font-size: 0.75rem; color: #9ca3af;'>
+        © 2025 Binance Algo Bot. All rights reserved.
+    </p>
 </div>
 """, unsafe_allow_html=True)
