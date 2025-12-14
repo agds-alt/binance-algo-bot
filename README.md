@@ -30,7 +30,9 @@
 - 🔄 3 concurrent positions
 - 🪙 5 trading pairs
 - 📊 Advanced strategies
-- 📉 Backtesting
+- 📉 **Backtesting engine** (NEW!)
+- 📈 Performance metrics (Sharpe, Sortino, drawdown)
+- 💾 Export results (CSV/JSON)
 - ⚡ Priority support
 
 ### PREMIUM Tier ($249/mo)
@@ -220,6 +222,48 @@ python -c "from modules.license_manager import LicenseManager; \
 
 ---
 
+## 📉 Backtesting (PRO Feature)
+
+Test strategies on historical data before risking real capital!
+
+### Features
+- ✅ Historical data from Binance (7-90 days)
+- ✅ Multiple timeframes (5m, 15m, 1h, 4h)
+- ✅ Multiple trading pairs (BNBUSDT, BTCUSDT, ETHUSDT)
+- ✅ Comprehensive metrics:
+  - Total return & return %
+  - Win rate & profit factor
+  - Sharpe & Sortino ratios
+  - Maximum drawdown
+  - Average R-multiple
+- ✅ Interactive charts (equity curve, drawdown)
+- ✅ Complete trade log
+- ✅ Export results (CSV/JSON)
+
+### How to Use
+1. Open dashboard at http://localhost:8501
+2. Go to "Backtesting" page (requires PRO license)
+3. Configure parameters:
+   - Select trading pair
+   - Choose timeframe
+   - Set backtest period (days)
+   - Configure capital & risk
+4. Click "Run Backtest"
+5. Review metrics and charts
+6. Export results if needed
+
+### Example Results
+```
+Total Return: +15.3% (30 days)
+Win Rate: 62.5% (15/24 trades)
+Sharpe Ratio: 2.34
+Max Drawdown: -8.7%
+Profit Factor: 2.1
+Average R-Multiple: 1.8R
+```
+
+---
+
 ## 📁 Project Structure
 
 ```
@@ -232,12 +276,22 @@ binance-algo-bot/
 │   ├── scalping_strategy.py  # TA & signals
 │   ├── trade_executor.py      # Order execution
 │   ├── license_manager.py     # Licensing
+│   ├── data_fetcher.py        # Historical data (NEW!)
+│   ├── backtester.py          # Backtesting engine (NEW!)
 │   └── telegram_bot.py        # Notifications
+├── pages/
+│   ├── 1_Market_Analysis.py   # Market scanner
+│   ├── 2_Performance.py       # P&L tracking
+│   ├── 3_Trade_History.py     # Trade log
+│   ├── 4_Settings.py          # Bot settings
+│   ├── 5_License.py           # License management
+│   └── 6_Backtesting.py       # Backtesting UI (NEW!)
 ├── config/
 │   ├── config.yaml            # Main config
 │   └── tiers.yaml             # Tier definitions
 ├── dashboard.py               # Streamlit GUI
 ├── main.py                    # CLI interface
+├── admin_license.py           # License admin tool
 ├── requirements.txt           # Dependencies
 ├── .env.example               # Env template
 └── README.md                  # This file

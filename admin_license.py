@@ -18,12 +18,18 @@ import sys
 from pathlib import Path
 from datetime import datetime
 from modules.license_manager import LicenseManager
-from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
-from rich import box
 
-console = Console()
+# Try to import rich, fallback to plain text if not available
+try:
+    from rich.console import Console
+    from rich.table import Table
+    from rich.panel import Panel
+    from rich import box
+    HAS_RICH = True
+    console = Console()
+except ImportError:
+    HAS_RICH = False
+    console = None
 
 
 def generate_license(args):
@@ -33,11 +39,18 @@ def generate_license(args):
     # Validate tier
     valid_tiers = ['free', 'pro', 'premium', 'enterprise']
     if args.tier.lower() not in valid_tiers:
-        console.print(f"[red]❌ Invalid tier. Must be one of: {', '.join(valid_tiers)}[/red]")
+        msg = f"❌ Invalid tier. Must be one of: {', '.join(valid_tiers)}"
+        if HAS_RICH:
+            console.print(f"[red]{msg}[/red]")
+        else:
+            print(msg)
         return
 
     # Generate license
-    console.print(f"\n[cyan]🔑 Generating {args.tier.upper()} license...[/cyan]\n")
+    if HAS_RICH:
+        console.print(f"\n[cyan]🔑 Generating {args.tier.upper()} license...[/cyan]\n")
+    else:
+        print(f"\n🔑 Generating {args.tier.upper()} license...\n")
 
     try:
         license = manager.create_license(
@@ -52,8 +65,9 @@ def generate_license(args):
         )
 
         # Display license info
-        panel = Panel(
-            f"""[bold green]{license.license_key}[/bold green]
+        if HAS_RICH:
+            panel = Panel(
+                f"""[bold green]{license.license_key}[/bold green]
 
 [cyan]Tier:[/cyan] {license.tier.upper()}
 [cyan]Email:[/cyan] {license.email}
@@ -63,12 +77,24 @@ def generate_license(args):
 [cyan]Max Activations:[/cyan] {license.max_activations}
 [cyan]User ID:[/cyan] {license.user_id}
 """,
-            title="✅ License Generated Successfully",
-            border_style="green",
-            box=box.ROUNDED
-        )
-
-        console.print(panel)
+                title="✅ License Generated Successfully",
+                border_style="green",
+                box=box.ROUNDED
+            )
+            console.print(panel)
+        else:
+            print("=" * 70)
+            print("✅ License Generated Successfully")
+            print("=" * 70)
+            print(f"\nLICENSE KEY: {license.license_key}\n")
+            print(f"Tier: {license.tier.upper()}")
+            print(f"Email: {license.email}")
+            print(f"Issued: {license.issued_date.strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"Expires: {license.expiry_date.strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"Duration: {args.days} days")
+            print(f"Max Activations: {license.max_activations}")
+            print(f"User ID: {license.user_id}")
+            print("=" * 70)
 
         # Save to file
         if args.save:
@@ -85,10 +111,18 @@ def generate_license(args):
                 f.write(f"Max Activations: {license.max_activations}\n")
                 f.write(f"User ID: {license.user_id}\n")
 
-            console.print(f"\n[green]💾 License saved to: {filename}[/green]")
+            msg = f"\n💾 License saved to: {filename}"
+            if HAS_RICH:
+                console.print(f"[green]{msg}[/green]")
+            else:
+                print(msg)
 
     except Exception as e:
-        console.print(f"[red]❌ Error generating license: {e}[/red]")
+        msg = f"❌ Error generating license: {e}"
+        if HAS_RICH:
+            console.print(f"[red]{msg}[/red]")
+        else:
+            print(msg)
 
 
 def validate_license(args):

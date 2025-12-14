@@ -1,0 +1,11 @@
+BINANCE ALGO BOT LICENSE
+==================================================
+
+License Key: PRO-AB24-5F1B-0301-C81B-23D7
+Tier: PRO
+Email: customer@example.com
+Issued: 2025-12-14 18:25:59
+Expires: 2026-01-13 18:25:59
+Duration: 30 days
+Max Activations: 1
+User ID: 5769903c-8824-4e0b-9952-151843e6910a
