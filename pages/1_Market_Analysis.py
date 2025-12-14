@@ -28,8 +28,8 @@ if 'tier' not in st.session_state:
         from modules.license_state import get_license_state
         license_state = get_license_state()
 
-        if license_state.license_key and license_state.is_valid:
-            st.session_state.tier = license_state.tier
+        if license_state.state.get('license_key') and license_state.state.get('is_valid'):
+            st.session_state.tier = license_state.state.get('tier', 'free')
             st.session_state.license_active = True
         else:
             st.session_state.tier = 'free'
