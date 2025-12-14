@@ -60,9 +60,28 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize session state
+# Initialize session state with license detection
 if 'tier' not in st.session_state:
-    st.session_state.tier = 'free'
+    # Check if license is active
+    try:
+        from modules.license_state import get_license_state
+        license_state = get_license_state()
+
+        # Load current license info
+        if license_state.license_key and license_state.is_valid:
+            st.session_state.tier = license_state.tier
+            st.session_state.license_active = True
+            st.session_state.license_key = license_state.license_key
+        else:
+            st.session_state.tier = 'free'
+            st.session_state.license_active = False
+            st.session_state.license_key = None
+    except Exception as e:
+        # Fallback to free tier if license check fails
+        st.session_state.tier = 'free'
+        st.session_state.license_active = False
+        st.session_state.license_key = None
+
 if 'license_active' not in st.session_state:
     st.session_state.license_active = False
 

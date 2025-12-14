@@ -80,12 +80,12 @@ with col1:
                 ind_col1, ind_col2, ind_col3 = st.columns(3)
 
                 with ind_col1:
-                    st.metric("Price", "$42,350", "+2.5%")
-                    st.metric("EMA 9", "$42,100")
+                    st.metric("Price", "$106,350", "+2.5%")
+                    st.metric("EMA 9", "$106,100")
 
                 with ind_col2:
-                    st.metric("EMA 21", "$41,800")
-                    st.metric("EMA 50", "$41,200")
+                    st.metric("EMA 21", "$105,800")
+                    st.metric("EMA 50", "$105,200")
 
                 with ind_col3:
                     st.metric("RSI", "58.3")
@@ -104,11 +104,11 @@ with col1:
                 - ❌ Spread slightly high (0.06%)
 
                 **Trade Setup**:
-                - Entry: $42,350
-                - Stop Loss: $41,920 (1.02%)
-                - TP1 (50%): $42,995 (1.5R)
-                - TP2 (30%): $43,425 (2.5R)
-                - TP3 (20%): $44,070 (4.0R)
+                - Entry: $106,350
+                - Stop Loss: $104,920 (1.34%)
+                - TP1 (50%): $108,495 (1.5R)
+                - TP2 (30%): $109,925 (2.5R)
+                - TP3 (20%): $111,570 (4.0R)
 
                 **Risk/Reward**: 1:1.5 ✅
                 """)
@@ -122,9 +122,9 @@ with col2:
     # Support/Resistance
     st.markdown("#### Support/Resistance")
     st.markdown("""
-    **Resistance**: $43,500
-    **Current**: $42,350
-    **Support**: $41,000
+    **Resistance**: $108,500
+    **Current**: $106,350
+    **Support**: $104,000
     """)
 
     # Price chart placeholder
@@ -135,8 +135,8 @@ with col2:
         # Mock price chart
         import numpy as np
 
-        dates = pd.date_range(start='2025-01-01', periods=50, freq='5min')
-        prices = 42000 + np.cumsum(np.random.randn(50) * 100)
+        dates = pd.date_range(start='2025-12-15', periods=50, freq='5min')
+        prices = 106000 + np.cumsum(np.random.randn(50) * 250)
 
         fig = go.Figure()
         fig.add_trace(go.Scatter(
@@ -180,7 +180,7 @@ else:
                 "Confidence": ["5/6", "4/6", "2/6", "5/6", "3/6"],
                 "Trend": ["BULLISH", "BEARISH", "NEUTRAL", "BULLISH", "NEUTRAL"],
                 "RSI": [58.3, 42.1, 51.5, 62.3, 48.9],
-                "Entry": ["$42,350", "$2,245", "-", "$145.80", "-"],
+                "Entry": ["$106,350", "$3,245", "-", "$623.50", "-"],
             }
 
             df = pd.DataFrame(scanner_data)
