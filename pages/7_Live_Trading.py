@@ -20,7 +20,31 @@ from modules.bot_state_manager import get_bot_state_manager
 
 st.set_page_config(page_title="Live Trading", page_icon="🤖", layout="wide")
 
-st.title("🤖 Live Trading")
+# Enhanced CSS for Live Trading page
+st.markdown("""
+<style>
+    .section-header {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #e5e7eb;
+    }
+    .main-title {
+        font-size: 2.4rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown('<div class="main-title">🤖 Live Trading</div>', unsafe_allow_html=True)
+st.caption("Start, stop, and monitor automated trading bot")
 
 # Initialize tier with license detection
 if 'tier' not in st.session_state:
@@ -101,7 +125,7 @@ else:
 
 # Bot controls
 st.markdown("---")
-st.markdown("### 🎮 Bot Controls")
+st.markdown('<div class="section-header">🎮 Bot Controls</div>', unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns(3)
 
@@ -276,7 +300,7 @@ st.markdown("---")
 
 # Bot activity
 if is_bot_running:
-    st.markdown("### 📊 Live Activity")
+    st.markdown('<div class="section-header">📊 Live Activity</div>', unsafe_allow_html=True)
 
     # Get real-time stats from state manager
     stats = state_manager.get_stats()
@@ -385,7 +409,7 @@ if is_bot_running:
         )
 
 else:
-    st.markdown("### 💤 Bot is Idle")
+    st.markdown('<div class="section-header">💤 Bot is Idle</div>', unsafe_allow_html=True)
 
     st.info("""
     Click **"▶️ Start Bot"** to begin automated trading.
@@ -398,7 +422,7 @@ else:
     """)
 
     st.markdown("---")
-    st.markdown("### 📋 How to Run Bot")
+    st.markdown('<div class="section-header">📋 How to Run Bot</div>', unsafe_allow_html=True)
 
     st.markdown("""
     **Option 1: Via Dashboard (This Page)**
@@ -431,7 +455,7 @@ else:
 
 # Configuration summary
 st.markdown("---")
-st.markdown("### ⚙️ Active Configuration")
+st.markdown('<div class="section-header">⚙️ Active Configuration</div>', unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns(3)
 

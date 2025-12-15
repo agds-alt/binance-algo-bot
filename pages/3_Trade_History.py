@@ -14,7 +14,31 @@ from modules.bot_state_manager import get_bot_state_manager
 
 st.set_page_config(page_title="Trade History", page_icon="📋", layout="wide")
 
-st.title("📋 Trade History")
+# Enhanced CSS for Trade History page
+st.markdown("""
+<style>
+    .section-header {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #e5e7eb;
+    }
+    .main-title {
+        font-size: 2.4rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown('<div class="main-title">📋 Trade History</div>', unsafe_allow_html=True)
+st.caption("Complete trade log with real-time data and export options")
 
 # Initialize state manager
 state_manager = get_bot_state_manager()
@@ -40,7 +64,7 @@ with col4:
 st.markdown("---")
 
 # Trade table
-st.markdown("### 📊 Trades")
+st.markdown('<div class="section-header">📊 Trades</div>', unsafe_allow_html=True)
 
 # Get real trades from state manager
 trades = state_manager.get_trades(limit=1000)
@@ -125,7 +149,7 @@ else:
 
 # Summary stats from real data
 st.markdown("---")
-st.markdown("### 📊 Summary Statistics")
+st.markdown('<div class="section-header">📊 Summary Statistics</div>', unsafe_allow_html=True)
 
 stats = state_manager.get_stats()
 
@@ -146,7 +170,7 @@ with col4:
 
 # Additional metrics
 st.markdown("---")
-st.markdown("### 📈 Performance Breakdown")
+st.markdown('<div class="section-header">📈 Performance Breakdown</div>', unsafe_allow_html=True)
 
 col1, col2, col3, col4 = st.columns(4)
 

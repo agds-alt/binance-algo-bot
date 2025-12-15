@@ -14,6 +14,29 @@ from modules.license_state import get_license_state
 
 st.set_page_config(page_title="License", page_icon="🔐", layout="wide")
 
+# Enhanced CSS for License page
+st.markdown("""
+<style>
+    .section-header {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #e5e7eb;
+    }
+    .main-title {
+        font-size: 2.4rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Initialize license state
 license_state = get_license_state()
 
@@ -21,7 +44,8 @@ license_state = get_license_state()
 is_valid, validation_msg, current_tier = license_state.validate()
 license_info = license_state.get_license_info()
 
-st.title("🔐 License Management")
+st.markdown('<div class="main-title">🔐 License Management</div>', unsafe_allow_html=True)
+st.caption("Manage your subscription and licensing")
 
 # Current tier status
 tier_colors = {
@@ -47,7 +71,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # License activation section
-st.markdown("### 🔑 License Activation")
+st.markdown('<div class="section-header">🔑 License Activation</div>', unsafe_allow_html=True)
 
 # Show current license info if activated
 if license_info:
@@ -123,7 +147,7 @@ else:
     st.markdown("**Don't have a license?** Choose a plan below to get started!")
 
 # Pricing tiers
-st.markdown("### 💰 Pricing & Features")
+st.markdown('<div class="section-header">💰 Pricing & Features</div>', unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns(3)
 
@@ -206,7 +230,7 @@ with col3:
 
 # Payment methods
 st.markdown("---")
-st.markdown("### 💳 Payment Methods")
+st.markdown('<div class="section-header">💳 Payment Methods</div>', unsafe_allow_html=True)
 
 col1, col2, col3, col4 = st.columns(4)
 
@@ -239,7 +263,7 @@ if current_tier == 'free':
 
 # FAQ
 st.markdown("---")
-st.markdown("### ❓ Frequently Asked Questions")
+st.markdown('<div class="section-header">❓ Frequently Asked Questions</div>', unsafe_allow_html=True)
 
 with st.expander("How do I get a license key?"):
     st.markdown("""
