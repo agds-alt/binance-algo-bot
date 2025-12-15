@@ -8,13 +8,37 @@ import yaml
 
 st.set_page_config(page_title="Settings", page_icon="⚙️", layout="wide")
 
-st.title("⚙️ Settings")
+# Enhanced CSS for Settings page
+st.markdown("""
+<style>
+    .section-header {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #e5e7eb;
+    }
+    .main-title {
+        font-size: 2.4rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown('<div class="main-title">⚙️ Settings</div>', unsafe_allow_html=True)
+st.caption("Bot configuration and preferences")
 
 tabs = st.tabs(["🔑 API Keys", "⚖️ Risk Management", "📊 Strategy", "🔔 Notifications", "🎨 Preferences"])
 
 # Tab 1: API Keys
 with tabs[0]:
-    st.markdown("### 🔑 Binance API Configuration")
+    st.markdown('<div class="section-header">🔑 Binance API Configuration</div>', unsafe_allow_html=True)
 
     st.warning("⚠️ **Security Warning**: Never share your API keys. Keys are encrypted and stored locally.")
 
@@ -41,7 +65,7 @@ with tabs[0]:
 
 # Tab 2: Risk Management
 with tabs[1]:
-    st.markdown("### ⚖️ Risk Management Settings")
+    st.markdown('<div class="section-header">⚖️ Risk Management Settings</div>', unsafe_allow_html=True)
 
     st.info("🛡️ **Note**: These are HARD LIMITS and cannot exceed maximum values.")
 
@@ -70,7 +94,7 @@ with tabs[1]:
 
 # Tab 3: Strategy
 with tabs[2]:
-    st.markdown("### 📊 Strategy Configuration")
+    st.markdown('<div class="section-header">📊 Strategy Configuration</div>', unsafe_allow_html=True)
 
     if st.session_state.get('tier', 'free') == 'free':
         st.warning("⚠️ Strategy customization available in PRO tier")
@@ -97,7 +121,7 @@ with tabs[2]:
 
 # Tab 4: Notifications
 with tabs[3]:
-    st.markdown("### 🔔 Notification Settings")
+    st.markdown('<div class="section-header">🔔 Notification Settings</div>', unsafe_allow_html=True)
 
     telegram_enabled = st.checkbox("Enable Telegram Notifications")
 
@@ -122,7 +146,7 @@ with tabs[3]:
 
 # Tab 5: Preferences
 with tabs[4]:
-    st.markdown("### 🎨 Preferences")
+    st.markdown('<div class="section-header">🎨 Preferences</div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
@@ -140,7 +164,7 @@ with tabs[4]:
 st.markdown("---")
 
 # Emergency Actions
-st.markdown("### 🚨 Emergency Actions")
+st.markdown('<div class="section-header">🚨 Emergency Actions</div>', unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns(3)
 
