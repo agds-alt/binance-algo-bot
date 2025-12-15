@@ -18,7 +18,31 @@ from modules.backtester import Backtester, simple_ema_crossover_signals
 
 st.set_page_config(page_title="Backtesting", page_icon="📊", layout="wide")
 
-st.title("📊 Strategy Backtesting")
+# Enhanced CSS for Backtesting page
+st.markdown("""
+<style>
+    .section-header {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #e5e7eb;
+    }
+    .main-title {
+        font-size: 2.4rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown('<div class="main-title">📊 Strategy Backtesting</div>', unsafe_allow_html=True)
+st.caption("Test strategies on historical data before live trading")
 
 # Initialize tier with license detection
 if 'tier' not in st.session_state:
@@ -62,7 +86,7 @@ if current_tier == 'free':
 st.success("✅ Backtesting enabled (PRO feature)")
 
 # Backtest configuration
-st.markdown("### ⚙️ Backtest Configuration")
+st.markdown('<div class="section-header">⚙️ Backtest Configuration</div>', unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns(3)
 
@@ -221,7 +245,7 @@ if 'backtest_result' in st.session_state:
         st.metric("Duration", f"{result.duration_days} days")
 
     # Equity curve
-    st.markdown("### 📊 Equity Curve")
+    st.markdown('<div class="section-header">📊 Equity Curve</div>', unsafe_allow_html=True)
 
     fig = go.Figure()
 
@@ -245,7 +269,7 @@ if 'backtest_result' in st.session_state:
     st.plotly_chart(fig, use_container_width=True)
 
     # Drawdown curve
-    st.markdown("### 📉 Drawdown")
+    st.markdown('<div class="section-header">📉 Drawdown</div>', unsafe_allow_html=True)
 
     fig_dd = go.Figure()
 
@@ -272,7 +296,7 @@ if 'backtest_result' in st.session_state:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown("### 💰 P&L Breakdown")
+        st.markdown('<div class="section-header">💰 P&L Breakdown</div>', unsafe_allow_html=True)
 
         st.markdown(f"""
         **Gross Profit:** ${result.gross_profit:.2f}
@@ -286,7 +310,7 @@ if 'backtest_result' in st.session_state:
         """)
 
     with col2:
-        st.markdown("### 📊 Trade Statistics")
+        st.markdown('<div class="section-header">📊 Trade Statistics</div>', unsafe_allow_html=True)
 
         st.markdown(f"""
         **Total Trades:** {result.total_trades}
@@ -300,7 +324,7 @@ if 'backtest_result' in st.session_state:
         """)
 
     # Trade log
-    st.markdown("### 📋 Trade Log")
+    st.markdown('<div class="section-header">📋 Trade Log</div>', unsafe_allow_html=True)
 
     if result.trades:
         # Convert to DataFrame
@@ -355,7 +379,7 @@ if 'backtest_result' in st.session_state:
 
     # Performance summary
     st.markdown("---")
-    st.markdown("### 🎯 Summary")
+    st.markdown('<div class="section-header">🎯 Summary</div>', unsafe_allow_html=True)
 
     # Color code performance
     if result.total_return_percent > 10:
@@ -387,7 +411,7 @@ else:
 
     # Example results
     st.markdown("---")
-    st.markdown("### 📚 What You'll Get:")
+    st.markdown('<div class="section-header">📚 What You\'ll Get</div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 

@@ -20,7 +20,31 @@ from modules.data_fetcher import DataFetcher
 
 st.set_page_config(page_title="Market Analysis", page_icon="📈", layout="wide")
 
-st.title("📈 Market Analysis")
+# Enhanced CSS for Market Analysis page
+st.markdown("""
+<style>
+    .section-header {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #e5e7eb;
+    }
+    .main-title {
+        font-size: 2.4rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown('<div class="main-title">📈 Market Analysis</div>', unsafe_allow_html=True)
+st.caption("Real-time market scanning and signal detection")
 
 # Initialize tier with license detection
 if 'tier' not in st.session_state:
@@ -101,7 +125,7 @@ def fetch_live_data(symbol, interval):
 col1, col2 = st.columns([2, 1])
 
 with col1:
-    st.markdown("### 📊 Technical Analysis")
+    st.markdown('<div class="section-header">📊 Technical Analysis</div>', unsafe_allow_html=True)
 
     # Fetch data button
     if st.button("🚀 Scan Market", type="primary", use_container_width=True) or auto_refresh:
@@ -277,7 +301,7 @@ Waiting for better setup with 4+ confirmations.
                 st.error("❌ Failed to fetch market data. Please try again.")
 
 with col2:
-    st.markdown("### 🎯 Key Levels")
+    st.markdown('<div class="section-header">🎯 Key Levels</div>', unsafe_allow_html=True)
 
     # Fetch data for support/resistance
     df = fetch_live_data(selected_symbol, timeframe)
@@ -357,7 +381,7 @@ with col2:
 # Multi-pair scanner
 if st.session_state.tier != 'free':
     st.markdown("---")
-    st.markdown("### 🔍 Multi-Pair Scanner")
+    st.markdown('<div class="section-header">🔍 Multi-Pair Scanner</div>', unsafe_allow_html=True)
 
     if st.button("📡 Scan All Pairs", use_container_width=True):
         scanner_results = []
