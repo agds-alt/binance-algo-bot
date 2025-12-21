@@ -10,11 +10,21 @@
 
 ### Core Features (All Tiers)
 - ✅ Multi-timeframe technical analysis (5m/15m/1h)
+- ✅ **Relaxed signal detection algorithm** (NEW! ⬆️)
+  - 4/6 confirmations (easier to trigger)
+  - Works in sideways & low-volume markets
+  - Full debug mode with ✅/❌ indicators
+  - Shows all 6 confirmation checks
 - ✅ Strict risk management (hard limits)
 - ✅ Partial take profits (50%/30%/20%)
 - ✅ Automatic position sizing
 - ✅ Emergency close all
-- ✅ Telegram notifications
+- ✅ Telegram notifications (NEW! ⬆️)
+  - Real-time trade alerts
+  - P&L updates
+  - Risk warnings
+  - Bot commands
+  - Daily summaries
 
 ### FREE Tier
 - 📊 Paper trading only
@@ -195,6 +205,7 @@ Features:
 - 🎯 Trade history
 - ⚙️ Settings
 - 🔐 License management
+- 📱 Telegram configuration (NEW! ⬆️)
 
 ```bash
 streamlit run dashboard.py
@@ -218,6 +229,74 @@ python -c "from modules.license_manager import LicenseManager; \
 python -c "from modules.license_manager import LicenseManager; \
     lm = LicenseManager(); \
     print(lm.get_tier_info())"
+```
+
+---
+
+## 📱 Telegram Notifications (NEW!)
+
+Get real-time trading alerts directly on Telegram!
+
+### Setup
+1. **Create Bot:**
+   - Open Telegram and search for `@BotFather`
+   - Send `/newbot` command
+   - Follow instructions and copy your **Bot Token**
+
+2. **Get Chat ID:**
+   - Search for `@userinfobot` on Telegram
+   - Start chat and copy your **Chat ID**
+
+3. **Configure in Dashboard:**
+   - Open dashboard at http://localhost:8501
+   - Go to "📱 Telegram" page
+   - Enter Bot Token and Chat ID
+   - Click "Save Configuration"
+   - Test notifications!
+
+### Features
+**Trade Notifications:**
+- 🟢 Trade opened (entry, SL, TP levels)
+- 🎯 Take profit hit (with profit amount)
+- 🛑 Stop loss hit (with loss amount)
+- 💼 Trade closed (manual close)
+
+**Risk Alerts:**
+- ⚠️ Daily loss limit approaching
+- 🚨 Max drawdown reached
+- ❄️ Consecutive losses cooldown
+- 📊 Portfolio risk warnings
+
+**Daily Reports:**
+- 📈 Daily summary (trades, P&L, win rate)
+- 💰 Balance updates
+- 📊 Performance metrics
+
+**Bot Commands:**
+- `/status` - Current bot status
+- `/balance` - Account balance
+- `/positions` - Open positions
+- `/stats` - Daily statistics
+- `/pause` - Pause trading
+- `/resume` - Resume trading
+- `/close` - Close all positions
+- `/help` - Show commands
+
+### Example Notifications
+```
+🟢 NEW TRADE OPENED 🟢
+
+💰 Symbol: BNBUSDT
+📈 Side: LONG
+💵 Entry: $245.30
+📊 Quantity: 10.5
+⚡ Leverage: 5x
+
+🎯 Targets:
+• TP1: $250.00
+• SL: $242.00
+
+💸 Risk: $50.00
 ```
 
 ---
@@ -276,16 +355,18 @@ binance-algo-bot/
 │   ├── scalping_strategy.py  # TA & signals
 │   ├── trade_executor.py      # Order execution
 │   ├── license_manager.py     # Licensing
-│   ├── data_fetcher.py        # Historical data (NEW!)
-│   ├── backtester.py          # Backtesting engine (NEW!)
-│   └── telegram_bot.py        # Notifications
+│   ├── data_fetcher.py        # Historical data
+│   ├── backtester.py          # Backtesting engine
+│   └── telegram_bot.py        # Telegram integration (NEW!)
 ├── pages/
 │   ├── 1_Market_Analysis.py   # Market scanner
 │   ├── 2_Performance.py       # P&L tracking
 │   ├── 3_Trade_History.py     # Trade log
 │   ├── 4_Settings.py          # Bot settings
 │   ├── 5_License.py           # License management
-│   └── 6_Backtesting.py       # Backtesting UI (NEW!)
+│   ├── 6_Backtesting.py       # Backtesting UI
+│   ├── 7_Live_Trading.py      # Live trading control
+│   └── 8_Telegram.py          # Telegram config (NEW!)
 ├── config/
 │   ├── config.yaml            # Main config
 │   └── tiers.yaml             # Tier definitions

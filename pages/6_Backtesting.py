@@ -14,7 +14,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from modules.data_fetcher import DataFetcher
-from modules.backtester import Backtester, simple_ema_crossover_signals
+from modules.backtester import Backtester, optimized_ema_crossover_signals
 
 st.set_page_config(page_title="Backtesting", page_icon="📊", layout="wide")
 
@@ -183,7 +183,7 @@ if st.button("🚀 Run Backtest", type="primary", use_container_width=True):
         result = backtester.run_backtest(
             df=df,
             symbol=symbol,
-            generate_signals_func=simple_ema_crossover_signals,
+            generate_signals_func=optimized_ema_crossover_signals,
             timeframe=timeframe
         )
 

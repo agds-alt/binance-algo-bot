@@ -52,10 +52,14 @@ RISK_LIMITS = RiskLimits()
 @dataclass
 class ScalpingConfig:
     """Scalping strategy configuration"""
+    # Strategy Selection
+    # Options: "ema_crossover", "stochastic_rsi", "relaxed_ema"
+    STRATEGY_TYPE: str = "relaxed_ema"  # Better for low volume markets
+
     # Timeframes
-    PRIMARY_TIMEFRAME: str = "5m"
-    HIGHER_TIMEFRAME: str = "15m"
-    TREND_TIMEFRAME: str = "1h"
+    PRIMARY_TIMEFRAME: str = "1m"  # Changed from 5m for faster scalping
+    HIGHER_TIMEFRAME: str = "5m"   # Changed from 15m
+    TREND_TIMEFRAME: str = "15m"   # Changed from 1h
 
     # Indicators
     EMA_FAST: int = 9

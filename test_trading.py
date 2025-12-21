@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from modules.config import BINANCE_TESTNET
 from modules.data_fetcher import DataFetcher
 from modules.bot_state_manager import get_bot_state_manager, Position, Trade
-from modules.backtester import simple_ema_crossover_signals
+from modules.backtester import optimized_ema_crossover_signals
 import pandas as pd
 import numpy as np
 
@@ -208,34 +208,21 @@ class TestTradingBot:
         df = self.fetcher.calculate_indicators(df)
         logger.info(f"✅ Indicators calculated\n")
 
-        # Generate signals (modifies df in-place)
-        simple_ema_crossover_signals(df)
-
-        # Find signal points
+        # Generate signals using OPTIMIZED strategy (5/6 confirmations required)
         signal_points = []
         for i in range(len(df) - 100, len(df)):  # Check last 100 candles
-            row = df.iloc[i]
-            prev = df.iloc[i-1]
+            # Use optimized signal function
+            signal = optimized_ema_crossover_signals(df.iloc[:i+1])
 
-            # EMA crossover
-            ema_cross_bull = prev['ema_8'] <= prev['ema_21'] and row['ema_8'] > row['ema_21']
-            ema_cross_bear = prev['ema_8'] >= prev['ema_21'] and row['ema_8'] < row['ema_21']
-
-            # Confirmations
-            trend_ok = (ema_cross_bull and row['close'] > row['ema_50']) or \
-                       (ema_cross_bear and row['close'] < row['ema_50'])
-            rsi_ok = 30 < row['rsi'] < 70
-            volume_ok = row['volume'] > row['volume_ma']
-
-            confirmations = sum([ema_cross_bull or ema_cross_bear, trend_ok, rsi_ok, volume_ok])
-
-            if confirmations >= 3:
+            if signal:
                 signal_points.append({
                     'index': i,
-                    'side': 'LONG' if ema_cross_bull else 'SHORT',
-                    'price': row['close'],
-                    'atr': row['atr'],
-                    'confirmations': confirmations
+                    'side': signal['side'],
+                    'price': signal['entry_price'],
+                    'atr': df.iloc[i]['atr'],
+                    'confirmations': signal.get('confirmations', 5),
+                    'stop_loss': signal['stop_loss'],
+                    'take_profits': signal['take_profits']
                 })
 
         logger.info(f"📡 Found {len(signal_points)} potential signals")

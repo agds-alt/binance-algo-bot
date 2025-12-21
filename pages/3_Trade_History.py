@@ -121,11 +121,15 @@ else:
             return 'background-color: rgba(255, 0, 0, 0.2)'
         return ''
 
-    st.dataframe(
-        df.style.applymap(color_pnl, subset=['P&L', 'P&L %']),
-        use_container_width=True,
-        hide_index=True
-    )
+    # Display with styling only if we have data
+    if len(df) > 0 and 'P&L' in df.columns and 'P&L %' in df.columns:
+        st.dataframe(
+            df.style.applymap(color_pnl, subset=['P&L', 'P&L %']),
+            use_container_width=True,
+            hide_index=True
+        )
+    else:
+        st.dataframe(df, use_container_width=True, hide_index=True)
 
     # Export
     col1, col2, col3 = st.columns([1, 1, 2])

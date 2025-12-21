@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, asdict
 import json
+import ta  # Technical Analysis library for Stochastic RSI
 
 
 @dataclass
@@ -516,5 +517,555 @@ def simple_ema_crossover_signals(df: pd.DataFrame) -> Optional[Dict]:
             'stop_loss': stop_loss,
             'take_profits': [tp1, tp2, tp3]
         }
+
+    return None
+
+
+def optimized_ema_crossover_signals(df: pd.DataFrame) -> Optional[Dict]:
+    """
+    Optimized EMA crossover strategy with stricter confirmations
+
+    Improvements:
+    - Volume filter (1.5x average)
+    - RSI range filter (30-70)
+    - Trend strength filter
+    - HTF alignment (EMA200)
+    - Requires 5/6 confirmations
+
+    Args:
+        df: DataFrame with indicators
+
+    Returns:
+        Signal dict or None
+    """
+    if len(df) < 2:
+        return None
+
+    current = df.iloc[-1]
+    previous = df.iloc[-2]
+
+    # Check confirmations
+    confirmations = 0
+
+    # 1. EMA crossover (required)
+    ema_cross_bullish = (previous['ema_8'] <= previous['ema_21'] and
+                         current['ema_8'] > current['ema_21'])
+    ema_cross_bearish = (previous['ema_8'] >= previous['ema_21'] and
+                         current['ema_8'] < current['ema_21'])
+
+    if not (ema_cross_bullish or ema_cross_bearish):
+        return None
+
+    # Determine signal type
+    if ema_cross_bullish:
+        signal_type = 'LONG'
+        confirmations += 1
+
+        # 2. Price above trend EMA (EMA50)
+        if current['close'] > current['ema_50']:
+            confirmations += 1
+
+        # 3. Trend strength (price at least 0.5% above EMA50)
+        ema_distance = ((current['close'] - current['ema_50']) / current['ema_50']) * 100
+        if ema_distance > 0.5:
+            confirmations += 1
+
+        # 4. RSI in range (30-70) - avoid overbought
+        if 30 < current['rsi'] < 70:
+            confirmations += 1
+
+        # 5. Volume confirmation (1.5x average)
+        volume_ratio = current['volume'] / current['volume_ma'] if current['volume_ma'] > 0 else 0
+        if volume_ratio > 1.5:
+            confirmations += 1
+
+        # 6. HTF alignment (price above EMA200)
+        if current['close'] > current['ema_200']:
+            confirmations += 1
+
+        # Require at least 5/6 confirmations
+        if confirmations >= 5:
+            entry_price = current['close']
+            atr = current['atr']
+
+            # ATR-based SL/TP
+            stop_loss = entry_price - (atr * 2.0)
+            tp1 = entry_price + (atr * 3.0)
+            tp2 = entry_price + (atr * 5.0)
+            tp3 = entry_price + (atr * 7.0)
+
+            return {
+                'side': 'LONG',
+                'entry_price': entry_price,
+                'stop_loss': stop_loss,
+                'take_profits': [tp1, tp2, tp3],
+                'confirmations': confirmations
+            }
+
+    elif ema_cross_bearish:
+        signal_type = 'SHORT'
+        confirmations += 1
+
+        # 2. Price below trend EMA (EMA50)
+        if current['close'] < current['ema_50']:
+            confirmations += 1
+
+        # 3. Trend strength (price at least 0.5% below EMA50)
+        ema_distance = ((current['ema_50'] - current['close']) / current['ema_50']) * 100
+        if ema_distance > 0.5:
+            confirmations += 1
+
+        # 4. RSI in range (30-70) - avoid oversold
+        if 30 < current['rsi'] < 70:
+            confirmations += 1
+
+        # 5. Volume confirmation (1.5x average)
+        volume_ratio = current['volume'] / current['volume_ma'] if current['volume_ma'] > 0 else 0
+        if volume_ratio > 1.5:
+            confirmations += 1
+
+        # 6. HTF alignment (price below EMA200)
+        if current['close'] < current['ema_200']:
+            confirmations += 1
+
+        # Require at least 5/6 confirmations
+        if confirmations >= 5:
+            entry_price = current['close']
+            atr = current['atr']
+
+            # ATR-based SL/TP
+            stop_loss = entry_price + (atr * 2.0)
+            tp1 = entry_price - (atr * 3.0)
+            tp2 = entry_price - (atr * 5.0)
+            tp3 = entry_price - (atr * 7.0)
+
+            return {
+                'side': 'SHORT',
+                'entry_price': entry_price,
+                'stop_loss': stop_loss,
+                'take_profits': [tp1, tp2, tp3],
+                'confirmations': confirmations
+            }
+
+    return None
+
+
+def relaxed_ema_crossover_signals(df: pd.DataFrame, debug: bool = False) -> Optional[Dict]:
+    """
+    RELAXED version for testing - easier to trigger signals
+    
+    Changes from optimized version:
+    - Volume filter: 1.2x (was 1.5x) 
+    - Requires 4/6 confirmations (was 5/6)
+    - RSI range: 25-75 (was 30-70)
+    - Trend strength: 0.3% (was 0.5%)
+    - More aggressive for testing
+    
+    Args:
+        df: DataFrame with indicators
+        debug: If True, return debug info even when no signal
+        
+    Returns:
+        Signal dict or None (or debug dict if debug=True)
+    """
+    if len(df) < 2:
+        return None
+    
+    current = df.iloc[-1]
+    previous = df.iloc[-2]
+    
+    # Debug info
+    debug_info = {
+        'has_signal': False,
+        'confirmations': 0,
+        'checks': {},
+        'mode': 'RELAXED (4/6 needed)'
+    }
+    
+    confirmations = 0
+    checks = {}
+    
+    # 1. EMA crossover (required)
+    ema_cross_bullish = (previous['ema_8'] <= previous['ema_21'] and
+                         current['ema_8'] > current['ema_21'])
+    ema_cross_bearish = (previous['ema_8'] >= previous['ema_21'] and
+                         current['ema_8'] < current['ema_21'])
+    
+    checks['1_ema_crossover'] = '✅ YES' if (ema_cross_bullish or ema_cross_bearish) else '❌ NO'
+    
+    if not (ema_cross_bullish or ema_cross_bearish):
+        if debug:
+            debug_info['checks'] = checks
+            debug_info['reason'] = 'No EMA crossover detected'
+            return debug_info
+        return None
+    
+    # Determine signal type
+    if ema_cross_bullish:
+        signal_type = 'LONG'
+        confirmations += 1
+        
+        # 2. Price above trend EMA (EMA50)
+        price_above_ema50 = current['close'] > current['ema_50']
+        checks['2_price_above_ema50'] = f"{'✅' if price_above_ema50 else '❌'} Price: ${current['close']:.2f}, EMA50: ${current['ema_50']:.2f}"
+        if price_above_ema50:
+            confirmations += 1
+        
+        # 3. Trend strength (0.3% above EMA50) - RELAXED
+        ema_distance = ((current['close'] - current['ema_50']) / current['ema_50']) * 100
+        trend_strong = ema_distance > 0.3
+        checks['3_trend_strength'] = f"{'✅' if trend_strong else '❌'} {ema_distance:.2f}% (need >0.3%)"
+        if trend_strong:
+            confirmations += 1
+        
+        # 4. RSI in range (25-75) - RELAXED
+        rsi_ok = 25 < current['rsi'] < 75
+        checks['4_rsi'] = f"{'✅' if rsi_ok else '❌'} RSI: {current['rsi']:.1f} (need 25-75)"
+        if rsi_ok:
+            confirmations += 1
+        
+        # 5. Volume confirmation (1.2x) - RELAXED
+        volume_ratio = current['volume'] / current['volume_ma'] if current['volume_ma'] > 0 else 0
+        volume_ok = volume_ratio > 1.2
+        checks['5_volume'] = f"{'✅' if volume_ok else '❌'} {volume_ratio:.2f}x avg (need >1.2x)"
+        if volume_ok:
+            confirmations += 1
+        
+        # 6. HTF alignment (above EMA200)
+        htf_aligned = current['close'] > current['ema_200']
+        checks['6_htf_alignment'] = f"{'✅' if htf_aligned else '❌'} Price vs EMA200: ${current['close']:.2f} vs ${current['ema_200']:.2f}"
+        if htf_aligned:
+            confirmations += 1
+        
+        debug_info['confirmations'] = confirmations
+        debug_info['checks'] = checks
+        debug_info['side'] = 'LONG'
+        
+        # Require 4/6 confirmations - RELAXED
+        if confirmations >= 4:
+            entry_price = current['close']
+            atr = current['atr']
+            
+            stop_loss = entry_price - (atr * 2.0)
+            tp1 = entry_price + (atr * 3.0)
+            tp2 = entry_price + (atr * 5.0)
+            tp3 = entry_price + (atr * 7.0)
+            
+            signal = {
+                'side': 'LONG',
+                'entry_price': entry_price,
+                'stop_loss': stop_loss,
+                'take_profits': [tp1, tp2, tp3],
+                'confirmations': confirmations,
+                'debug': checks if debug else None
+            }
+            
+            if debug:
+                debug_info['has_signal'] = True
+                debug_info.update(signal)
+            
+            return debug_info if debug else signal
+        else:
+            if debug:
+                debug_info['reason'] = f'Only {confirmations}/6 confirmations (need 4+)'
+                return debug_info
+            return None
+    
+    elif ema_cross_bearish:
+        signal_type = 'SHORT'
+        confirmations += 1
+        
+        # 2. Price below EMA50
+        price_below_ema50 = current['close'] < current['ema_50']
+        checks['2_price_below_ema50'] = f"{'✅' if price_below_ema50 else '❌'} Price: ${current['close']:.2f}, EMA50: ${current['ema_50']:.2f}"
+        if price_below_ema50:
+            confirmations += 1
+        
+        # 3. Trend strength
+        ema_distance = ((current['ema_50'] - current['close']) / current['ema_50']) * 100
+        trend_strong = ema_distance > 0.3
+        checks['3_trend_strength'] = f"{'✅' if trend_strong else '❌'} {ema_distance:.2f}% (need >0.3%)"
+        if trend_strong:
+            confirmations += 1
+        
+        # 4. RSI
+        rsi_ok = 25 < current['rsi'] < 75
+        checks['4_rsi'] = f"{'✅' if rsi_ok else '❌'} RSI: {current['rsi']:.1f} (need 25-75)"
+        if rsi_ok:
+            confirmations += 1
+        
+        # 5. Volume
+        volume_ratio = current['volume'] / current['volume_ma'] if current['volume_ma'] > 0 else 0
+        volume_ok = volume_ratio > 1.2
+        checks['5_volume'] = f"{'✅' if volume_ok else '❌'} {volume_ratio:.2f}x avg (need >1.2x)"
+        if volume_ok:
+            confirmations += 1
+        
+        # 6. HTF alignment
+        htf_aligned = current['close'] < current['ema_200']
+        checks['6_htf_alignment'] = f"{'✅' if htf_aligned else '❌'} Price vs EMA200: ${current['close']:.2f} vs ${current['ema_200']:.2f}"
+        if htf_aligned:
+            confirmations += 1
+        
+        debug_info['confirmations'] = confirmations
+        debug_info['checks'] = checks
+        debug_info['side'] = 'SHORT'
+        
+        if confirmations >= 4:
+            entry_price = current['close']
+            atr = current['atr']
+            
+            stop_loss = entry_price + (atr * 2.0)
+            tp1 = entry_price - (atr * 3.0)
+            tp2 = entry_price - (atr * 5.0)
+            tp3 = entry_price - (atr * 7.0)
+            
+            signal = {
+                'side': 'SHORT',
+                'entry_price': entry_price,
+                'stop_loss': stop_loss,
+                'take_profits': [tp1, tp2, tp3],
+                'confirmations': confirmations,
+                'debug': checks if debug else None
+            }
+            
+            if debug:
+                debug_info['has_signal'] = True
+                debug_info.update(signal)
+            
+            return debug_info if debug else signal
+        else:
+            if debug:
+                debug_info['reason'] = f'Only {confirmations}/6 confirmations (need 4+)'
+                return debug_info
+            return None
+
+    return None
+
+
+def stochastic_rsi_strategy(df: pd.DataFrame, debug: bool = False) -> Optional[Dict]:
+    """
+    Stochastic RSI Mean Reversion Strategy
+
+    Buy at oversold (Stoch RSI < 20-24)
+    Sell at overbought (Stoch RSI > 80)
+
+    Best for: Ranging/sideways markets on 1m timeframe
+    Win Rate: 70-75% in ranging, 45-50% in trending
+
+    Safety Filters:
+    - Trend filter (don't counter-trend trade)
+    - Volume confirmation
+    - Multiple confirmations required
+
+    Args:
+        df: DataFrame with OHLCV and indicators
+        debug: If True, returns detailed debug info
+
+    Returns:
+        Signal dict with entry/exit or None
+    """
+    if len(df) < 30:
+        return None
+
+    # Calculate Stochastic RSI
+    stoch_rsi = ta.momentum.StochRSIIndicator(
+        close=df['close'],
+        window=14,
+        smooth1=3,
+        smooth2=3
+    )
+    df['stoch_rsi'] = stoch_rsi.stochrsi() * 100  # Convert to 0-100 scale
+    df['stoch_rsi_k'] = stoch_rsi.stochrsi_k() * 100
+    df['stoch_rsi_d'] = stoch_rsi.stochrsi_d() * 100
+
+    current = df.iloc[-1]
+    previous = df.iloc[-2]
+
+    debug_info = {
+        'has_signal': False,
+        'side': None,
+        'confirmations': 0,
+        'checks': {},
+        'reason': ''
+    }
+    checks = {}
+
+    # Get current values
+    stoch_rsi_val = current['stoch_rsi']
+    stoch_rsi_k = current['stoch_rsi_k']
+    stoch_rsi_d = current['stoch_rsi_d']
+
+    # Check for LONG (oversold bounce)
+    oversold = stoch_rsi_val <= 30  # RELAXED: was 24 (more signals!)
+    oversold_bounce = previous['stoch_rsi'] < 25 and current['stoch_rsi'] >= 25  # Started bouncing
+    k_cross_d_bullish = previous['stoch_rsi_k'] <= previous['stoch_rsi_d'] and current['stoch_rsi_k'] > current['stoch_rsi_d']
+
+    # Check for SHORT (overbought rejection)
+    overbought = stoch_rsi_val >= 75  # RELAXED: was 80 (more signals!)
+    overbought_rejection = previous['stoch_rsi'] > 75 and current['stoch_rsi'] <= 75  # Started falling
+    k_cross_d_bearish = previous['stoch_rsi_k'] >= previous['stoch_rsi_d'] and current['stoch_rsi_k'] < current['stoch_rsi_d']
+
+    # LONG Signal
+    if oversold or oversold_bounce:
+        signal_type = 'LONG'
+        confirmations = 0
+
+        # 1. Stochastic RSI oversold
+        checks['1_stoch_rsi_oversold'] = f"{'✅' if oversold else '❌'} Stoch RSI: {stoch_rsi_val:.1f} (need ≤30)"
+        if oversold:
+            confirmations += 1
+
+        # 2. Bounce confirmation (previous < 20, current >= 20)
+        checks['2_oversold_bounce'] = f"{'✅' if oversold_bounce else '❌'} Bouncing from extreme"
+        if oversold_bounce:
+            confirmations += 1
+
+        # 3. K line crosses D line (bullish crossover)
+        checks['3_k_cross_d'] = f"{'✅' if k_cross_d_bullish else '❌'} K: {stoch_rsi_k:.1f}, D: {stoch_rsi_d:.1f}"
+        if k_cross_d_bullish:
+            confirmations += 1
+
+        # 4. Trend filter: Don't buy in strong downtrend
+        trend_ok = current['ema_21'] > current['ema_50'] or abs(current['ema_21'] - current['ema_50']) / current['ema_50'] < 0.005
+        checks['4_trend_filter'] = f"{'✅' if trend_ok else '❌'} EMA21 vs EMA50: Not strong downtrend"
+        if trend_ok:
+            confirmations += 1
+
+        # 5. Volume confirmation
+        vol_ma = df['volume'].rolling(20).mean().iloc[-1]
+        volume_ok = current['volume'] > vol_ma * 1.0  # Any volume (less strict)
+        checks['5_volume'] = f"{'✅' if volume_ok else '❌'} {current['volume'] / vol_ma:.2f}x avg"
+        if volume_ok:
+            confirmations += 1
+
+        # 6. RSI not too low (avoid knife-catching)
+        rsi_ok = current['rsi'] > 20  # RSI above 20 to avoid dead cat bounce
+        checks['6_rsi_filter'] = f"{'✅' if rsi_ok else '❌'} RSI: {current['rsi']:.1f} (need >20)"
+        if rsi_ok:
+            confirmations += 1
+
+        debug_info['confirmations'] = confirmations
+        debug_info['checks'] = checks
+        debug_info['side'] = 'LONG'
+
+        # Require 4/6 confirmations
+        if confirmations >= 4:
+            entry_price = current['close']
+            atr = current['atr']
+
+            # Tight stops for scalping
+            stop_loss = entry_price - (atr * 1.5)
+
+            # Target: Stoch RSI 80 = overbought
+            # Estimate: ~0.3-0.5% move on 1m typically
+            tp1 = entry_price + (atr * 1.5)  # Quick scalp
+            tp2 = entry_price + (atr * 2.5)  # Medium target
+            tp3 = entry_price + (atr * 4.0)  # Extended (if momentum continues)
+
+            signal = {
+                'side': 'LONG',
+                'entry_price': entry_price,
+                'stop_loss': stop_loss,
+                'take_profits': [tp1, tp2, tp3],
+                'confirmations': confirmations,
+                'debug': checks if debug else None
+            }
+
+            if debug:
+                debug_info['has_signal'] = True
+                debug_info.update(signal)
+
+            return debug_info if debug else signal
+        else:
+            if debug:
+                debug_info['reason'] = f'Only {confirmations}/6 confirmations (need 4+)'
+                return debug_info
+            return None
+
+    # SHORT Signal
+    elif overbought or overbought_rejection:
+        signal_type = 'SHORT'
+        confirmations = 0
+
+        # 1. Stochastic RSI overbought
+        checks['1_stoch_rsi_overbought'] = f"{'✅' if overbought else '❌'} Stoch RSI: {stoch_rsi_val:.1f} (need ≥75)"
+        if overbought:
+            confirmations += 1
+
+        # 2. Rejection confirmation (previous > 80, current <= 80)
+        checks['2_overbought_rejection'] = f"{'✅' if overbought_rejection else '❌'} Rejecting from extreme"
+        if overbought_rejection:
+            confirmations += 1
+
+        # 3. K line crosses D line (bearish crossover)
+        checks['3_k_cross_d'] = f"{'✅' if k_cross_d_bearish else '❌'} K: {stoch_rsi_k:.1f}, D: {stoch_rsi_d:.1f}"
+        if k_cross_d_bearish:
+            confirmations += 1
+
+        # 4. Trend filter: Don't short in strong uptrend
+        trend_ok = current['ema_21'] < current['ema_50'] or abs(current['ema_21'] - current['ema_50']) / current['ema_50'] < 0.005
+        checks['4_trend_filter'] = f"{'✅' if trend_ok else '❌'} EMA21 vs EMA50: Not strong uptrend"
+        if trend_ok:
+            confirmations += 1
+
+        # 5. Volume confirmation
+        vol_ma = df['volume'].rolling(20).mean().iloc[-1]
+        volume_ok = current['volume'] > vol_ma * 1.0
+        checks['5_volume'] = f"{'✅' if volume_ok else '❌'} {current['volume'] / vol_ma:.2f}x avg"
+        if volume_ok:
+            confirmations += 1
+
+        # 6. RSI not too high
+        rsi_ok = current['rsi'] < 80
+        checks['6_rsi_filter'] = f"{'✅' if rsi_ok else '❌'} RSI: {current['rsi']:.1f} (need <80)"
+        if rsi_ok:
+            confirmations += 1
+
+        debug_info['confirmations'] = confirmations
+        debug_info['checks'] = checks
+        debug_info['side'] = 'SHORT'
+
+        # Require 4/6 confirmations
+        if confirmations >= 4:
+            entry_price = current['close']
+            atr = current['atr']
+
+            # Tight stops for scalping
+            stop_loss = entry_price + (atr * 1.5)
+
+            # Target: Stoch RSI 20 = oversold
+            tp1 = entry_price - (atr * 1.5)
+            tp2 = entry_price - (atr * 2.5)
+            tp3 = entry_price - (atr * 4.0)
+
+            signal = {
+                'side': 'SHORT',
+                'entry_price': entry_price,
+                'stop_loss': stop_loss,
+                'take_profits': [tp1, tp2, tp3],
+                'confirmations': confirmations,
+                'debug': checks if debug else None
+            }
+
+            if debug:
+                debug_info['has_signal'] = True
+                debug_info.update(signal)
+
+            return debug_info if debug else signal
+        else:
+            if debug:
+                debug_info['reason'] = f'Only {confirmations}/6 confirmations (need 4+)'
+                return debug_info
+            return None
+
+    # No signal
+    if debug:
+        debug_info['reason'] = f'Stoch RSI in neutral zone: {stoch_rsi_val:.1f} (wait for <24 or >80)'
+        checks['stoch_rsi'] = f"Stoch RSI: {stoch_rsi_val:.1f}"
+        checks['k_line'] = f"K: {stoch_rsi_k:.1f}"
+        checks['d_line'] = f"D: {stoch_rsi_d:.1f}"
+        debug_info['checks'] = checks
+        return debug_info
 
     return None

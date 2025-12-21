@@ -102,6 +102,13 @@ class DataFetcher:
 
                 except httpx.HTTPError as e:
                     print(f"Error fetching klines: {e}")
+                    print(f"URL: {self.base_url}/fapi/v1/klines")
+                    print(f"Params: {params}")
+                    break
+                except Exception as e:
+                    print(f"Unexpected error fetching klines: {e}")
+                    import traceback
+                    traceback.print_exc()
                     break
 
         # Convert to DataFrame
@@ -150,9 +157,30 @@ class DataFetcher:
         Returns:
             DataFrame with OHLCV data
         """
-        return asyncio.run(
-            self.fetch_klines(symbol, interval, start_time, end_time, limit)
-        )
+        try:
+            # Check if event loop is already running (e.g., in Streamlit)
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # Use nest_asyncio to allow nested event loops
+                import nest_asyncio
+                nest_asyncio.apply()
+                return asyncio.run(
+                    self.fetch_klines(symbol, interval, start_time, end_time, limit)
+                )
+            else:
+                return asyncio.run(
+                    self.fetch_klines(symbol, interval, start_time, end_time, limit)
+                )
+        except RuntimeError:
+            # Fallback: create new event loop
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                return loop.run_until_complete(
+                    self.fetch_klines(symbol, interval, start_time, end_time, limit)
+                )
+            finally:
+                loop.close()
 
     async def fetch_multiple_timeframes(
         self,

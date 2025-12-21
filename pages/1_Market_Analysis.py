@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from modules.config import ALLOWED_PAIRS, SCALPING_CONFIG, BINANCE_TESTNET
 from modules.tier_manager import TierManager
 from modules.data_fetcher import DataFetcher
+from modules.backtester import relaxed_ema_crossover_signals
 
 st.set_page_config(page_title="Market Analysis", page_icon="📈", layout="wide")
 
@@ -195,85 +196,46 @@ with col1:
                     volume_ratio = latest['volume'] / latest['volume_ma'] if latest['volume_ma'] > 0 else 1.0
                     st.metric("Volume", f"{volume_ratio:.2f}x avg")
 
-                # Signal detection
-                st.markdown("#### Signal Analysis")
+                # Signal detection using RELAXED algorithm
+                st.markdown("#### 🎯 Signal Analysis (RELAXED MODE)")
+                st.caption("Using relaxed criteria: 4/6 confirmations, 1.2x volume, 25-75 RSI")
 
-                # Check for EMA crossover
-                ema_cross_bullish = prev['ema_8'] <= prev['ema_21'] and latest['ema_8'] > latest['ema_21']
-                ema_cross_bearish = prev['ema_8'] >= prev['ema_21'] and latest['ema_8'] < latest['ema_21']
+                # Get signal with debug info
+                signal_result = relaxed_ema_crossover_signals(df, debug=True)
 
-                # Check confirmations
-                confirmations = []
+                if signal_result:
+                    has_signal = signal_result.get('has_signal', False)
+                    conf_count = signal_result.get('confirmations', 0)
+                    checks = signal_result.get('checks', {})
 
-                if ema_cross_bullish:
-                    confirmations.append(("✅", "EMA crossover (bullish)"))
-                elif ema_cross_bearish:
-                    confirmations.append(("✅", "EMA crossover (bearish)"))
-                else:
-                    confirmations.append(("❌", "No EMA crossover"))
+                    signal_type = signal_result.get('side', 'NEUTRAL')
+                    signal_color = "green" if signal_type == "LONG" else "red" if signal_type == "SHORT" else "gray"
 
-                if latest['close'] > latest['ema_50']:
-                    confirmations.append(("✅", "Price above trend EMA"))
-                else:
-                    confirmations.append(("❌", "Price below trend EMA"))
+                    # Display debug info
+                    st.markdown("**Confirmation Checks:**")
+                    for check_name, check_value in checks.items():
+                        st.text(f"{check_name}: {check_value}")
 
-                if 30 < latest['rsi'] < 70:
-                    confirmations.append(("✅", f"RSI in range ({latest['rsi']:.1f})"))
-                elif latest['rsi'] <= 30:
-                    confirmations.append(("⚠️", f"RSI oversold ({latest['rsi']:.1f})"))
-                else:
-                    confirmations.append(("⚠️", f"RSI overbought ({latest['rsi']:.1f})"))
+                    st.markdown("---")
 
-                if volume_ratio > 1.2:
-                    confirmations.append(("✅", f"Volume confirmed ({volume_ratio:.2f}x avg)"))
-                else:
-                    confirmations.append(("❌", f"Low volume ({volume_ratio:.2f}x avg)"))
+                    # Display signal
+                    if has_signal and signal_type != "NEUTRAL":
+                        # Get trade setup from signal
+                        entry = signal_result.get('entry_price', latest['close'])
+                        stop_loss = signal_result.get('stop_loss')
+                        take_profits = signal_result.get('take_profits', [])
 
-                if htf_aligned:
-                    confirmations.append(("✅", "HTF trend aligned"))
-                else:
-                    confirmations.append(("❌", "HTF trend not aligned"))
+                        tp1 = take_profits[0] if len(take_profits) > 0 else entry
+                        tp2 = take_profits[1] if len(take_profits) > 1 else entry
+                        tp3 = take_profits[2] if len(take_profits) > 2 else entry
 
-                # Count confirmations
-                conf_count = sum(1 for c in confirmations if c[0] == "✅")
+                        sl_pct = abs((entry - stop_loss) / entry) * 100
+                        rr_ratio = abs((tp1 - entry) / (entry - stop_loss)) if stop_loss != entry else 0
 
-                # Generate signal
-                if ema_cross_bullish and conf_count >= 4:
-                    signal_type = "LONG"
-                    signal_color = "green"
-                elif ema_cross_bearish and conf_count >= 4:
-                    signal_type = "SHORT"
-                    signal_color = "red"
-                else:
-                    signal_type = "NEUTRAL"
-                    signal_color = "gray"
+                        st.success(f"""
+🎯 **{signal_type} SIGNAL DETECTED!** ✅
 
-                # Display signal
-                if signal_type != "NEUTRAL":
-                    # Calculate trade setup
-                    atr = latest['atr']
-
-                    if signal_type == "LONG":
-                        entry = latest['close']
-                        stop_loss = entry - (atr * 2.0)
-                        tp1 = entry + (atr * 3.0)
-                        tp2 = entry + (atr * 5.0)
-                        tp3 = entry + (atr * 7.0)
-                    else:  # SHORT
-                        entry = latest['close']
-                        stop_loss = entry + (atr * 2.0)
-                        tp1 = entry - (atr * 3.0)
-                        tp2 = entry - (atr * 5.0)
-                        tp3 = entry - (atr * 7.0)
-
-                    sl_pct = abs((entry - stop_loss) / entry) * 100
-                    rr_ratio = abs((tp1 - entry) / (entry - stop_loss))
-
-                    st.success(f"""
-🎯 **{signal_type} SIGNAL DETECTED**
-
-**Confirmations**: {conf_count}/5
-{chr(10).join(f"- {icon} {text}" for icon, text in confirmations)}
+**Confirmations**: {conf_count}/6 (RELAXED: Need 4+)
 
 **Trade Setup**:
 - Entry: ${entry:,.2f}
@@ -284,15 +246,21 @@ with col1:
 
 **Risk/Reward**: 1:{rr_ratio:.1f} {'✅' if rr_ratio >= 1.5 else '⚠️'}
                     """)
-                else:
-                    st.info(f"""
+                    else:
+                        # Format checks for display
+                        checks_display = '\n'.join([f"- {name.replace('_', ' ').title()}: {value}"
+                                                     for name, value in checks.items()])
+
+                        st.info(f"""
 ℹ️ **NO CLEAR SIGNAL**
 
-**Confirmations**: {conf_count}/5
-{chr(10).join(f"- {icon} {text}" for icon, text in confirmations)}
+**Confirmations**: {conf_count}/6 (RELAXED: Need 4+ for signal)
+
+**Checks:**
+{checks_display}
 
 Waiting for better setup with 4+ confirmations.
-                    """)
+                        """)
 
                 if st.session_state.tier == 'free':
                     st.warning("⚠️ FREE tier: Analysis only. Upgrade to PRO for live trading!")
