@@ -163,7 +163,7 @@ def show_user_info_sidebar():
                         font-size: 0.9rem;
                         color: {tier_color};
                         font-weight: bold;
-                        text-shadow: 0 0 10px {tier_color};
+                        
                     ">{tier_icon} {tier.upper()} TIER</div>
                 </div>
             </div>

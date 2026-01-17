@@ -117,7 +117,7 @@ st.markdown("""
     [data-testid="stSidebar"] h2,
     [data-testid="stSidebar"] h3 {
         color: #00ff41 !important;
-        text-shadow: 0 0 10px #00ff41 !important;
+        text-shadow: none;
     }
 
     /* ============================================ */
@@ -132,7 +132,7 @@ st.markdown("""
     /* Headers with GREEN GLOW */
     h1, h2, h3, h4, h5, h6 {
         color: #00ff41 !important;
-        text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 30px #00ff41 !important;
+        text-shadow: none;
         font-weight: 800 !important;
     }
 
@@ -140,7 +140,7 @@ st.markdown("""
         font-size: 2.8rem;
         font-weight: 800;
         color: #00ff41 !important;
-        text-shadow: 0 0 15px #00ff41, 0 0 30px #00ff41, 0 0 45px #00ff41 !important;
+        text-shadow: none;
         margin-bottom: 0.5rem;
         letter-spacing: -1px;
     }
@@ -149,7 +149,7 @@ st.markdown("""
         font-size: 1.4rem;
         font-weight: 700;
         color: #00ff41 !important;
-        text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41 !important;
+        text-shadow: none;
         margin-top: 2rem;
         margin-bottom: 1rem;
         padding-bottom: 0.5rem;
@@ -190,7 +190,7 @@ st.markdown("""
         font-size: 1.8rem;
         font-weight: 700;
         color: #00ff41 !important;
-        text-shadow: 0 0 10px #00ff41 !important;
+        text-shadow: none;
     }
 
     [data-testid="stMetricLabel"] {
@@ -218,7 +218,7 @@ st.markdown("""
     .tier-free {
         color: #00ff41 !important;
         border-color: #00ff41 !important;
-        text-shadow: 0 0 10px #00ff41 !important;
+        text-shadow: none;
     }
     .tier-pro {
         color: #00ffff !important;
@@ -251,7 +251,7 @@ st.markdown("""
         height: 3rem;
         font-weight: 700 !important;
         font-size: 0.95rem;
-        text-shadow: 0 0 5px #00ff41 !important;
+        text-shadow: none;
         box-shadow: 0 0 15px rgba(0, 255, 65, 0.3) !important;
         transition: all 0.3s;
     }
@@ -284,7 +284,7 @@ st.markdown("""
     [data-testid="stSidebar"] h2,
     [data-testid="stSidebar"] h3 {
         color: #00ff41 !important;
-        text-shadow: 0 0 10px #00ff41 !important;
+        text-shadow: none;
     }
 
     /* ============================================ */
@@ -423,12 +423,12 @@ st.markdown("""
     /* ============================================ */
 
     @keyframes glow {
-        0%, 100% { text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 30px #00ff41; }
-        50% { text-shadow: 0 0 15px #00ff41, 0 0 30px #00ff41, 0 0 45px #00ff41; }
+        0%, 100% { text-shadow: none; }
+        50% { text-shadow: none; }
     }
 
     .main-header, h1 {
-        animation: glow 2s ease-in-out infinite;
+        animation: none;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -480,8 +480,8 @@ with st.sidebar:
     st.markdown("""
     <div style="text-align: center; padding: 2rem 0 1rem 0;">
         <div style="font-size: 4rem; margin-bottom: 0.5rem;">🤖</div>
-        <h2 style="color: #00ff41; margin: 0; font-weight: 700; font-size: 1.5rem; text-shadow: 0 0 10px #00ff41;">BotX</h2>
-        <p style="color: #00ff41; margin-top: 0.5rem; font-size: 0.85rem; text-shadow: 0 0 5px #00ff41;">v1.0.0 • {}</p>
+        <h2 style="color: #00ff41; margin: 0; font-weight: 700; font-size: 1.5rem;">BotX</h2>
+        <p style="color: #00ff41; margin-top: 0.5rem; font-size: 0.85rem;">v1.0.0 • {}</p>
     </div>
     """.format('🧪 TESTNET' if BINANCE_TESTNET else '🔴 LIVE'), unsafe_allow_html=True)
 

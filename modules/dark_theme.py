@@ -36,8 +36,8 @@ DARK_THEME_CSS = """
     /* Headers with GREEN GLOW */
     h1, h2, h3, h4, h5, h6 {
         color: #00ff41 !important;
-        text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 30px #00ff41 !important;
-        animation: glow 2s ease-in-out infinite;
+        text-shadow: none;
+        animation: none;
     }
 
     /* White text for all content */
@@ -84,7 +84,7 @@ DARK_THEME_CSS = """
     /* Metrics - green theme */
     [data-testid="stMetricValue"] {
         color: #00ff41 !important;
-        text-shadow: 0 0 10px #00ff41 !important;
+        text-shadow: none;
     }
 
     [data-testid="stMetricLabel"] {
@@ -184,10 +184,10 @@ DARK_THEME_CSS = """
     /* Glow animation */
     @keyframes glow {
         0%, 100% {
-            text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 30px #00ff41;
+            text-shadow: none;
         }
         50% {
-            text-shadow: 0 0 15px #00ff41, 0 0 30px #00ff41, 0 0 45px #00ff41;
+            text-shadow: none;
         }
     }
 
@@ -212,7 +212,7 @@ DARK_THEME_CSS = """
         font-size: 2.4rem;
         font-weight: 800;
         color: #00ff41 !important;
-        text-shadow: 0 0 20px #00ff41 !important;
+        text-shadow: none;
         margin-bottom: 0.5rem;
     }
 
