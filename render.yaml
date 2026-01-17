@@ -1,0 +1,23 @@
+services:
+  # Main Dashboard Service
+  - type: web
+    name: botx-dashboard
+    env: python
+    region: oregon  # Closest free region
+    plan: free
+    branch: master
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run dashboard.py --server.port=$PORT --server.address=0.0.0.0 --server.headless=true --server.enableCORS=false --server.enableXsrfProtection=false
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: BINANCE_TESTNET
+        value: true
+      - key: STREAMLIT_SERVER_PORT
+        sync: false
+        value: 10000
+      - key: STREAMLIT_SERVER_HEADLESS
+        value: true
+      - key: STREAMLIT_BROWSER_GATHER_USAGE_STATS
+        value: false
