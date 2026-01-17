@@ -87,6 +87,40 @@ st.markdown("""
     }
 
     /* ============================================ */
+    /* SIDEBAR - FULL BLACK */
+    /* ============================================ */
+
+    /* Sidebar background */
+    [data-testid="stSidebar"] {
+        background-color: #000000 !important;
+    }
+
+    [data-testid="stSidebar"] > div:first-child {
+        background-color: #000000 !important;
+    }
+
+    section[data-testid="stSidebar"] {
+        background-color: #000000 !important;
+    }
+
+    section[data-testid="stSidebar"] > div {
+        background-color: #000000 !important;
+    }
+
+    /* Sidebar text white */
+    [data-testid="stSidebar"] * {
+        color: #ffffff !important;
+    }
+
+    /* Sidebar headers green */
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3 {
+        color: #00ff41 !important;
+        text-shadow: 0 0 10px #00ff41 !important;
+    }
+
+    /* ============================================ */
     /* TEXT COLORS - WHITE */
     /* ============================================ */
 

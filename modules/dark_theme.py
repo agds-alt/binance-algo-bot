@@ -15,9 +15,22 @@ DARK_THEME_CSS = """
         background-color: #000000 !important;
     }
 
-    /* Sidebar dark */
+    /* Sidebar dark - full black */
     [data-testid="stSidebar"] {
-        background-color: #0a0a0a !important;
+        background-color: #000000 !important;
+    }
+
+    [data-testid="stSidebar"] > div:first-child {
+        background-color: #000000 !important;
+    }
+
+    /* Sidebar content */
+    section[data-testid="stSidebar"] {
+        background-color: #000000 !important;
+    }
+
+    section[data-testid="stSidebar"] > div {
+        background-color: #000000 !important;
     }
 
     /* Headers with GREEN GLOW */
