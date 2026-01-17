@@ -25,6 +25,124 @@ st.set_page_config(
     layout="centered"
 )
 
+# Dark Theme CSS with Green Glow
+st.markdown("""
+<style>
+    /* Dark background - full black */
+    .stApp {
+        background-color: #000000 !important;
+    }
+
+    /* Main content area */
+    .main {
+        background-color: #000000 !important;
+    }
+
+    /* Headers with GREEN GLOW */
+    h1, h2, h3, h4, h5, h6 {
+        color: #00ff41 !important;
+        text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 30px #00ff41 !important;
+        animation: glow 2s ease-in-out infinite;
+    }
+
+    /* White text for all content */
+    p, .stMarkdown, .stText, label, span, div {
+        color: #ffffff !important;
+    }
+
+    /* Buttons - green neon */
+    .stButton>button {
+        background: linear-gradient(135deg, #003300 0%, #006600 100%) !important;
+        color: #00ff41 !important;
+        border: 2px solid #00ff41 !important;
+        font-weight: bold !important;
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.3) !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .stButton>button:hover {
+        background: linear-gradient(135deg, #006600 0%, #009900 100%) !important;
+        box-shadow: 0 0 25px rgba(0, 255, 65, 0.6) !important;
+        transform: translateY(-2px);
+    }
+
+    /* Input fields - dark with green border */
+    .stTextInput>div>div>input {
+        background-color: #0a0a0a !important;
+        color: #ffffff !important;
+        border: 1px solid #00ff41 !important;
+        border-radius: 5px !important;
+        box-shadow: 0 0 10px rgba(0, 255, 65, 0.2) !important;
+    }
+
+    .stTextInput>div>div>input:focus {
+        border: 2px solid #00ff41 !important;
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.4) !important;
+    }
+
+    /* Info boxes - dark with green accent */
+    .stAlert, [data-testid="stNotification"] {
+        background-color: #0a0a0a !important;
+        border: 1px solid #00ff41 !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 10px rgba(0, 255, 65, 0.2) !important;
+    }
+
+    /* Success messages - green glow */
+    .stSuccess {
+        background-color: #001a00 !important;
+        border: 2px solid #00ff41 !important;
+        color: #00ff41 !important;
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.3) !important;
+    }
+
+    /* Error messages - red glow */
+    .stError {
+        background-color: #1a0000 !important;
+        border: 2px solid #ff0000 !important;
+        color: #ff4444 !important;
+        box-shadow: 0 0 15px rgba(255, 0, 0, 0.3) !important;
+    }
+
+    /* Expander - dark with green */
+    .streamlit-expanderHeader {
+        background-color: #0a0a0a !important;
+        border: 1px solid #00ff41 !important;
+        color: #00ff41 !important;
+    }
+
+    /* Checkbox */
+    .stCheckbox>label {
+        color: #ffffff !important;
+    }
+
+    /* Forms */
+    [data-testid="stForm"] {
+        background-color: #0a0a0a !important;
+        border: 2px solid #00ff41 !important;
+        border-radius: 10px !important;
+        padding: 20px !important;
+        box-shadow: 0 0 20px rgba(0, 255, 65, 0.2) !important;
+    }
+
+    /* Glow animation */
+    @keyframes glow {
+        0%, 100% {
+            text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 30px #00ff41;
+        }
+        50% {
+            text-shadow: 0 0 15px #00ff41, 0 0 30px #00ff41, 0 0 45px #00ff41;
+        }
+    }
+
+    /* Divider */
+    hr {
+        border-color: #00ff41 !important;
+        opacity: 0.3 !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Initialize session
 init_session_state()
 

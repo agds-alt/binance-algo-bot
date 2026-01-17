@@ -21,24 +21,127 @@ from modules.backtester import relaxed_ema_crossover_signals
 
 st.set_page_config(page_title="Market Analysis", page_icon="📈", layout="wide")
 
-# Enhanced CSS for Market Analysis page
+# Dark Theme CSS with Green Glow
 st.markdown("""
 <style>
+    /* Dark background - full black */
+    .stApp {
+        background-color: #000000 !important;
+    }
+
+    /* Main content area */
+    .main {
+        background-color: #000000 !important;
+    }
+
+    /* Sidebar dark */
+    [data-testid="stSidebar"] {
+        background-color: #0a0a0a !important;
+    }
+
+    /* Headers with GREEN GLOW */
+    h1, h2, h3, h4, h5, h6 {
+        color: #00ff41 !important;
+        text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 30px #00ff41 !important;
+        animation: glow 2s ease-in-out infinite;
+    }
+
+    /* White text for all content */
+    p, .stMarkdown, .stText, label, span, div, .stCaption {
+        color: #ffffff !important;
+    }
+
+    /* Buttons - green neon */
+    .stButton>button {
+        background: linear-gradient(135deg, #003300 0%, #006600 100%) !important;
+        color: #00ff41 !important;
+        border: 2px solid #00ff41 !important;
+        font-weight: bold !important;
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.3) !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .stButton>button:hover {
+        background: linear-gradient(135deg, #006600 0%, #009900 100%) !important;
+        box-shadow: 0 0 25px rgba(0, 255, 65, 0.6) !important;
+        transform: translateY(-2px);
+    }
+
+    /* Metrics - green theme */
+    [data-testid="stMetricValue"] {
+        color: #00ff41 !important;
+        text-shadow: 0 0 10px #00ff41 !important;
+    }
+
+    [data-testid="stMetricLabel"] {
+        color: #ffffff !important;
+    }
+
+    /* Dataframes/Tables - dark theme */
+    .stDataFrame {
+        background-color: #0a0a0a !important;
+        border: 1px solid #00ff41 !important;
+    }
+
+    /* Plotly charts - dark background */
+    .js-plotly-plot {
+        background-color: #0a0a0a !important;
+    }
+
+    /* Success messages - green glow */
+    .stSuccess {
+        background-color: #001a00 !important;
+        border: 2px solid #00ff41 !important;
+        color: #00ff41 !important;
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.3) !important;
+    }
+
+    /* Info boxes - dark with green accent */
+    .stInfo {
+        background-color: #0a0a0a !important;
+        border: 1px solid #00ff41 !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 10px rgba(0, 255, 65, 0.2) !important;
+    }
+
+    /* Warning - yellow glow */
+    .stWarning {
+        background-color: #1a1a00 !important;
+        border: 2px solid #ffff00 !important;
+        color: #ffff00 !important;
+        box-shadow: 0 0 15px rgba(255, 255, 0, 0.3) !important;
+    }
+
+    /* Glow animation */
+    @keyframes glow {
+        0%, 100% {
+            text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 30px #00ff41;
+        }
+        50% {
+            text-shadow: 0 0 15px #00ff41, 0 0 30px #00ff41, 0 0 45px #00ff41;
+        }
+    }
+
+    /* Divider */
+    hr {
+        border-color: #00ff41 !important;
+        opacity: 0.3 !important;
+    }
+
     .section-header {
         font-size: 1.4rem;
         font-weight: 700;
-        color: #1f2937;
+        color: #00ff41 !important;
         margin-top: 2rem;
         margin-bottom: 1rem;
         padding-bottom: 0.5rem;
-        border-bottom: 3px solid #e5e7eb;
+        border-bottom: 3px solid #00ff41;
     }
     .main-title {
         font-size: 2.4rem;
         font-weight: 800;
-        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: #00ff41 !important;
+        text-shadow: 0 0 20px #00ff41 !important;
         margin-bottom: 0.5rem;
     }
 </style>

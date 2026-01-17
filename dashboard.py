@@ -50,21 +50,55 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Enhanced Custom CSS - More Professional
+# 🎨 DARK THEME WITH GREEN NEON GLOW - Cyberpunk Style
 st.markdown("""
 <style>
-    /* Main container */
-    .main > div {
-        padding-top: 2rem;
+    /* ============================================ */
+    /* DARK BACKGROUND - FULL BLACK */
+    /* ============================================ */
+
+    /* Main app background */
+    .stApp {
+        background-color: #000000 !important;
     }
 
-    /* Headers */
+    /* Main container */
+    .main {
+        background-color: #000000 !important;
+    }
+
+    .main > div {
+        padding-top: 2rem;
+        background-color: #000000 !important;
+    }
+
+    /* Block container */
+    .block-container {
+        background-color: #000000 !important;
+        padding-top: 2rem !important;
+    }
+
+    /* ============================================ */
+    /* TEXT COLORS - WHITE */
+    /* ============================================ */
+
+    /* All text white */
+    .stApp, .main, p, span, div, label {
+        color: #ffffff !important;
+    }
+
+    /* Headers with GREEN GLOW */
+    h1, h2, h3, h4, h5, h6 {
+        color: #00ff41 !important;
+        text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 30px #00ff41 !important;
+        font-weight: 800 !important;
+    }
+
     .main-header {
         font-size: 2.8rem;
         font-weight: 800;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: #00ff41 !important;
+        text-shadow: 0 0 15px #00ff41, 0 0 30px #00ff41, 0 0 45px #00ff41 !important;
         margin-bottom: 0.5rem;
         letter-spacing: -1px;
     }
@@ -72,29 +106,60 @@ st.markdown("""
     .section-header {
         font-size: 1.4rem;
         font-weight: 700;
-        color: #1f2937;
+        color: #00ff41 !important;
+        text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41 !important;
         margin-top: 2rem;
         margin-bottom: 1rem;
         padding-bottom: 0.5rem;
-        border-bottom: 3px solid #e5e7eb;
+        border-bottom: 2px solid #00ff41 !important;
+        box-shadow: 0 1px 10px rgba(0, 255, 65, 0.5) !important;
     }
 
-    /* Metric cards */
+    /* ============================================ */
+    /* METRIC CARDS - DARK WITH GREEN ACCENT */
+    /* ============================================ */
+
     .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%) !important;
         padding: 1.5rem;
         border-radius: 12px;
-        color: white;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        transition: transform 0.2s;
+        border: 2px solid #00ff41 !important;
+        color: white !important;
+        box-shadow: 0 0 20px rgba(0, 255, 65, 0.3), inset 0 0 20px rgba(0, 255, 65, 0.1) !important;
+        transition: all 0.3s;
     }
 
     .metric-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 0 30px rgba(0, 255, 65, 0.5), inset 0 0 30px rgba(0, 255, 65, 0.2) !important;
+        border-color: #00ff88 !important;
     }
 
-    /* Tier badges */
+    /* Streamlit metrics */
+    [data-testid="stMetric"] {
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%) !important;
+        padding: 1rem !important;
+        border-radius: 10px !important;
+        border: 1px solid #00ff41 !important;
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.2) !important;
+    }
+
+    [data-testid="stMetricValue"] {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #00ff41 !important;
+        text-shadow: 0 0 10px #00ff41 !important;
+    }
+
+    [data-testid="stMetricLabel"] {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+    }
+
+    /* ============================================ */
+    /* TIER BADGES - NEON GLOW */
+    /* ============================================ */
+
     .tier-badge {
         display: inline-block;
         padding: 0.6rem 1.2rem;
@@ -103,77 +168,225 @@ st.markdown("""
         font-size: 0.85rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 2px solid #00ff41;
+        background: rgba(0, 0, 0, 0.8);
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.5), inset 0 0 15px rgba(0, 255, 65, 0.2);
     }
 
     .tier-free {
-        background: linear-gradient(135deg, #6b7280, #9ca3af);
-        color: white;
+        color: #00ff41 !important;
+        border-color: #00ff41 !important;
+        text-shadow: 0 0 10px #00ff41 !important;
     }
     .tier-pro {
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
-        color: white;
+        color: #00ffff !important;
+        border-color: #00ffff !important;
+        text-shadow: 0 0 10px #00ffff !important;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.5), inset 0 0 15px rgba(0, 255, 255, 0.2) !important;
     }
     .tier-premium {
-        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-        color: white;
+        color: #ff00ff !important;
+        border-color: #ff00ff !important;
+        text-shadow: 0 0 10px #ff00ff !important;
+        box-shadow: 0 0 15px rgba(255, 0, 255, 0.5), inset 0 0 15px rgba(255, 0, 255, 0.2) !important;
     }
     .tier-enterprise {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
-        color: white;
+        color: #ff0000 !important;
+        border-color: #ff0000 !important;
+        text-shadow: 0 0 10px #ff0000 !important;
+        box-shadow: 0 0 15px rgba(255, 0, 0, 0.5), inset 0 0 15px rgba(255, 0, 0, 0.2) !important;
     }
 
-    /* Buttons */
+    /* ============================================ */
+    /* BUTTONS - GREEN NEON */
+    /* ============================================ */
+
     .stButton>button {
-        width: 100%;
+        background: linear-gradient(135deg, #003300 0%, #006600 100%) !important;
+        color: #00ff41 !important;
+        border: 2px solid #00ff41 !important;
         border-radius: 8px;
         height: 3rem;
-        font-weight: 600;
+        font-weight: 700 !important;
         font-size: 0.95rem;
-        border: none;
+        text-shadow: 0 0 5px #00ff41 !important;
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.3) !important;
         transition: all 0.3s;
     }
 
     .stButton>button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        background: linear-gradient(135deg, #004400 0%, #008800 100%) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 0 25px rgba(0, 255, 65, 0.6), 0 5px 15px rgba(0, 0, 0, 0.5) !important;
+        border-color: #00ff88 !important;
     }
 
-    /* Sidebar styling */
+    /* ============================================ */
+    /* SIDEBAR - DARK WITH GREEN ACCENT */
+    /* ============================================ */
+
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+        background: linear-gradient(180deg, #000000 0%, #0a0a0a 100%) !important;
+        border-right: 2px solid #00ff41 !important;
+        box-shadow: 2px 0 20px rgba(0, 255, 65, 0.2) !important;
     }
 
-    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
-        color: #e5e7eb;
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"],
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] div {
+        color: #ffffff !important;
     }
 
-    /* Info boxes */
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3 {
+        color: #00ff41 !important;
+        text-shadow: 0 0 10px #00ff41 !important;
+    }
+
+    /* ============================================ */
+    /* ALERTS & INFO BOXES */
+    /* ============================================ */
+
     .stAlert {
+        background-color: rgba(0, 255, 65, 0.1) !important;
+        border: 1px solid #00ff41 !important;
+        border-left: 4px solid #00ff41 !important;
         border-radius: 10px;
-        border-left: 4px solid #3b82f6;
+        color: #ffffff !important;
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.2) !important;
     }
 
-    /* Metrics */
-    [data-testid="stMetricValue"] {
-        font-size: 1.8rem;
-        font-weight: 700;
+    .stSuccess {
+        background-color: rgba(0, 255, 65, 0.15) !important;
+        border-color: #00ff41 !important;
     }
 
-    /* Dividers */
+    .stError {
+        background-color: rgba(255, 0, 0, 0.15) !important;
+        border-color: #ff0000 !important;
+        box-shadow: 0 0 15px rgba(255, 0, 0, 0.2) !important;
+    }
+
+    .stWarning {
+        background-color: rgba(255, 255, 0, 0.15) !important;
+        border-color: #ffff00 !important;
+        box-shadow: 0 0 15px rgba(255, 255, 0, 0.2) !important;
+    }
+
+    /* ============================================ */
+    /* INPUTS & FORMS - DARK WITH GREEN BORDER */
+    /* ============================================ */
+
+    input, textarea, select {
+        background-color: #0a0a0a !important;
+        color: #ffffff !important;
+        border: 1px solid #00ff41 !important;
+        border-radius: 5px !important;
+        box-shadow: 0 0 10px rgba(0, 255, 65, 0.2) !important;
+    }
+
+    input:focus, textarea:focus, select:focus {
+        border-color: #00ff88 !important;
+        box-shadow: 0 0 20px rgba(0, 255, 65, 0.4) !important;
+        outline: none !important;
+    }
+
+    /* ============================================ */
+    /* DIVIDERS - GREEN GLOW */
+    /* ============================================ */
+
     hr {
         margin: 2rem 0;
         border: none;
-        border-top: 2px solid #e5e7eb;
+        border-top: 1px solid #00ff41 !important;
+        box-shadow: 0 1px 10px rgba(0, 255, 65, 0.3) !important;
     }
 
-    /* Cards */
+    /* ============================================ */
+    /* CARDS - DARK WITH GREEN BORDER */
+    /* ============================================ */
+
     .info-card {
-        background: white;
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%) !important;
         padding: 1.5rem;
         border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        border: 1px solid #e5e7eb;
+        border: 1px solid #00ff41 !important;
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    /* Dataframe/Table */
+    [data-testid="stDataFrame"], table {
+        background-color: #0a0a0a !important;
+        border: 1px solid #00ff41 !important;
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.2) !important;
+    }
+
+    table thead {
+        background-color: #003300 !important;
+        color: #00ff41 !important;
+    }
+
+    table tbody tr {
+        background-color: #0a0a0a !important;
+        color: #ffffff !important;
+        border-bottom: 1px solid rgba(0, 255, 65, 0.2) !important;
+    }
+
+    table tbody tr:hover {
+        background-color: rgba(0, 255, 65, 0.1) !important;
+    }
+
+    /* ============================================ */
+    /* CHARTS - DARK THEME */
+    /* ============================================ */
+
+    .js-plotly-plot {
+        background-color: #0a0a0a !important;
+        border: 1px solid #00ff41 !important;
+        border-radius: 10px !important;
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.2) !important;
+    }
+
+    /* ============================================ */
+    /* SCROLLBAR - GREEN THEME */
+    /* ============================================ */
+
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #0a0a0a;
+        border: 1px solid rgba(0, 255, 65, 0.1);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #003300, #006600);
+        border-radius: 5px;
+        border: 1px solid #00ff41;
+        box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, #004400, #008800);
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+    }
+
+    /* ============================================ */
+    /* GLOW ANIMATION */
+    /* ============================================ */
+
+    @keyframes glow {
+        0%, 100% { text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 30px #00ff41; }
+        50% { text-shadow: 0 0 15px #00ff41, 0 0 30px #00ff41, 0 0 45px #00ff41; }
+    }
+
+    .main-header, h1 {
+        animation: glow 2s ease-in-out infinite;
     }
 </style>
 """, unsafe_allow_html=True)
