@@ -446,40 +446,13 @@ with st.sidebar:
     st.markdown("""
     <div style="text-align: center; padding: 2rem 0 1rem 0;">
         <div style="font-size: 4rem; margin-bottom: 0.5rem;">🤖</div>
-        <h2 style="color: white; margin: 0; font-weight: 700; font-size: 1.4rem;">Binance Algo Bot</h2>
-        <p style="color: #9ca3af; margin-top: 0.5rem; font-size: 0.85rem;">v1.0.0 • {}</p>
+        <h2 style="color: #00ff41; margin: 0; font-weight: 700; font-size: 1.5rem; text-shadow: 0 0 10px #00ff41;">BotX</h2>
+        <p style="color: #00ff41; margin-top: 0.5rem; font-size: 0.85rem; text-shadow: 0 0 5px #00ff41;">v1.0.0 • {}</p>
     </div>
     """.format('🧪 TESTNET' if BINANCE_TESTNET else '🔴 LIVE'), unsafe_allow_html=True)
 
-    st.markdown("---")
-
-    # Tier Badge
-    tier_name = tier_manager.current_tier_config['name']
-    tier_colors = {
-        'free': 'tier-free',
-        'pro': 'tier-pro',
-        'premium': 'tier-premium',
-        'enterprise': 'tier-enterprise'
-    }
-
-    # Show user info
+    # Show user info (includes tier badge, license status, and user profile)
     show_user_info_sidebar()
-
-    st.markdown(f"""
-    <div style="text-align: center; margin-bottom: 1.5rem;">
-        <div class="tier-badge {tier_colors[st.session_state.tier]}">
-            {tier_name}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # License Status
-    if st.session_state.license_active:
-        st.success("✅ License Active", icon="🔐")
-    else:
-        st.warning("⚠️ Free Tier", icon="🆓")
-        if st.button("🚀 Upgrade Now", use_container_width=True, type="primary"):
-            st.switch_page("pages/5_License.py")
 
     st.markdown("---")
 
