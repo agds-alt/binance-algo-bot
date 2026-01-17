@@ -4,8 +4,17 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "streamlit run dashboard.py --server.port=$PORT --server.address=0.0.0.0",
+    "startCommand": "streamlit run dashboard.py --server.port=$PORT --server.address=0.0.0.0 --server.maxUploadSize=5",
     "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10
+    "restartPolicyMaxRetries": 3,
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 300
+  },
+  "regions": [
+    "us-west1"
+  ],
+  "service": {
+    "memory": 512,
+    "cpu": 0.5
   }
 }
