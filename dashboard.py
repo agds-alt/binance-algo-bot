@@ -21,6 +21,8 @@ from modules.auth_helpers import (
     show_user_info_sidebar,
     check_session_validity
 )
+from modules.pwa_support import inject_pwa_support, show_install_button
+from modules.responsive_layout import apply_responsive_layout
 from datetime import datetime
 import yaml
 
@@ -44,11 +46,17 @@ check_session_validity()
 
 # Page config
 st.set_page_config(
-    page_title="Binance Algo Bot",
+    page_title="BotX - Binance Algo Bot",
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# 💻 PWA Support
+inject_pwa_support()
+
+# 📱 Responsive Layout
+apply_responsive_layout()
 
 # 🎨 DARK THEME WITH GREEN NEON GLOW - Cyberpunk Style
 st.markdown("""

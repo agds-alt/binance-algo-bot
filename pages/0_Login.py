@@ -17,6 +17,8 @@ from modules.auth_helpers import (
     login_user,
     get_current_user
 )
+from modules.pwa_support import inject_pwa_support
+from modules.responsive_layout import apply_responsive_layout
 
 # Page config
 st.set_page_config(
@@ -24,6 +26,12 @@ st.set_page_config(
     page_icon="🔐",
     layout="centered"
 )
+
+# 💻 PWA Support
+inject_pwa_support()
+
+# 📱 Responsive Layout
+apply_responsive_layout()
 
 # Dark Theme CSS with Green Glow
 st.markdown("""

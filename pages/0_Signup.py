@@ -13,6 +13,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from modules.user_manager import get_user_manager
 from modules.auth_helpers import init_session_state, is_authenticated, get_current_user
+from modules.pwa_support import inject_pwa_support
+from modules.responsive_layout import apply_responsive_layout
 
 # Page config
 st.set_page_config(
@@ -20,6 +22,12 @@ st.set_page_config(
     page_icon="📝",
     layout="centered"
 )
+
+# 💻 PWA Support
+inject_pwa_support()
+
+# 📱 Responsive Layout
+apply_responsive_layout()
 
 # Dark Theme CSS with Green Glow
 st.markdown("""

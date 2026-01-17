@@ -13,8 +13,16 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from modules.auth_helpers import require_auth, get_current_user, show_user_info_sidebar
 from modules.user_manager import get_user_manager
 from modules.license_manager import LicenseManager
+from modules.pwa_support import inject_pwa_support
+from modules.responsive_layout import apply_responsive_layout
 
 st.set_page_config(page_title="License", page_icon="🔐", layout="wide")
+
+# 💻 PWA Support
+inject_pwa_support()
+
+# 📱 Responsive Layout
+apply_responsive_layout()
 
 # Require authentication
 @require_auth

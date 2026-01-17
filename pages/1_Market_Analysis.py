@@ -18,8 +18,16 @@ from modules.config import ALLOWED_PAIRS, SCALPING_CONFIG, BINANCE_TESTNET
 from modules.tier_manager import TierManager
 from modules.data_fetcher import DataFetcher
 from modules.backtester import relaxed_ema_crossover_signals
+from modules.pwa_support import inject_pwa_support
+from modules.responsive_layout import apply_responsive_layout
 
 st.set_page_config(page_title="Market Analysis", page_icon="📈", layout="wide")
+
+# 💻 PWA Support
+inject_pwa_support()
+
+# 📱 Responsive Layout
+apply_responsive_layout()
 
 # Dark Theme CSS with Green Glow
 st.markdown("""
