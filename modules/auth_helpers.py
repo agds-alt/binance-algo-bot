@@ -112,24 +112,129 @@ def require_tier(required_tier: str):
 
 
 def show_user_info_sidebar():
-    """Show user info in sidebar"""
+    """Show user info in sidebar with dark theme"""
     if is_authenticated():
         user = get_current_user()
+
+        # Tier colors with green theme
+        tier_colors = {
+            'free': '#00ff41',      # Green
+            'pro': '#00ffff',       # Cyan
+            'premium': '#ff00ff',   # Magenta
+            'enterprise': '#ff0000' # Red
+        }
+
+        tier_icons = {
+            'free': '🆓',
+            'pro': '⭐',
+            'premium': '💎',
+            'enterprise': '👑'
+        }
+
+        tier = user.get('tier', 'free').lower()
+        tier_color = tier_colors.get(tier, '#00ff41')
+        tier_icon = tier_icons.get(tier, '🆓')
+
         with st.sidebar:
             st.markdown("---")
-            st.markdown("### 👤 Logged In")
-            st.markdown(f"**{user['username']}**")
-            st.markdown(f"Tier: **{user['tier'].upper()}** 💎")
 
-            if st.button("🚪 Logout", use_container_width=True):
+            # User profile card with dark theme
+            st.markdown(f"""
+            <div style="
+                background: linear-gradient(135deg, #0a0a0a 0%, #001a00 100%);
+                border: 2px solid {tier_color};
+                border-radius: 12px;
+                padding: 20px;
+                margin: 10px 0;
+                box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+            ">
+                <div style="text-align: center;">
+                    <div style="
+                        font-size: 3rem;
+                        margin-bottom: 10px;
+                    ">👤</div>
+                    <div style="
+                        font-size: 1.2rem;
+                        font-weight: bold;
+                        color: #ffffff;
+                        margin-bottom: 5px;
+                    ">{user['username']}</div>
+                    <div style="
+                        font-size: 0.9rem;
+                        color: {tier_color};
+                        font-weight: bold;
+                        text-shadow: 0 0 10px {tier_color};
+                    ">{tier_icon} {tier.upper()} TIER</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # Stats
+            if user.get('email'):
+                st.markdown(f"""
+                <div style="
+                    background-color: #0a0a0a;
+                    border: 1px solid #00ff41;
+                    border-radius: 8px;
+                    padding: 10px;
+                    margin: 10px 0;
+                    font-size: 0.85rem;
+                    color: #ffffff;
+                ">
+                    <div style="margin-bottom: 5px;">
+                        <span style="color: #00ff41;">📧</span> {user['email']}
+                    </div>
+                    <div>
+                        <span style="color: #00ff41;">📅</span> Member since {user.get('created_at', 'N/A')[:10]}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            # Quick actions
+            col1, col2 = st.columns(2)
+
+            with col1:
+                if st.button("⚙️ Settings", use_container_width=True):
+                    st.switch_page("pages/4_Settings.py")
+
+            with col2:
+                if st.button("💎 License", use_container_width=True):
+                    st.switch_page("pages/5_License.py")
+
+            # Logout button
+            if st.button("🚪 Logout", use_container_width=True, type="secondary"):
                 logout_user()
                 st.rerun()
     else:
         with st.sidebar:
             st.markdown("---")
-            st.info("🔐 Please login to continue")
-            if st.button("Login", use_container_width=True):
+
+            # Login prompt card
+            st.markdown("""
+            <div style="
+                background: linear-gradient(135deg, #0a0a0a 0%, #1a0000 100%);
+                border: 2px solid #ff0000;
+                border-radius: 12px;
+                padding: 20px;
+                margin: 10px 0;
+                box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
+                text-align: center;
+            ">
+                <div style="font-size: 2.5rem; margin-bottom: 10px;">🔐</div>
+                <div style="color: #ffffff; font-weight: bold; margin-bottom: 10px;">
+                    Not Logged In
+                </div>
+                <div style="color: #cccccc; font-size: 0.9rem;">
+                    Login to access all features
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            if st.button("🔑 Login", use_container_width=True, type="primary"):
                 st.switch_page("pages/0_Login.py")
+
+            if st.button("📝 Sign Up", use_container_width=True):
+                st.switch_page("pages/0_Signup.py")
 
 
 def check_session_validity():
