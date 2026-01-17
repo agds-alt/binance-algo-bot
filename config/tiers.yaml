@@ -14,7 +14,7 @@ tiers:
     features:
       # Trading Limits
       max_position_size_usd: 100  # Max $100 per trade
-      max_daily_trades: 3  # Max 3 trades per day
+      max_daily_trades: 1  # Max 1 trade per day (taste test!)
       max_concurrent_positions: 1  # Only 1 position at a time
       available_leverage: [3]  # Only 3x leverage
 
