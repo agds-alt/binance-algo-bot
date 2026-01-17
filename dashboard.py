@@ -14,8 +14,33 @@ sys.path.insert(0, str(Path(__file__).parent))
 from modules.config import RISK_LIMITS, BINANCE_TESTNET
 from modules.tier_manager import TierManager, TierLevel
 from modules.bot_state_manager import get_bot_state_manager
+from modules.auth_helpers import (
+    init_session_state,
+    is_authenticated,
+    get_current_user,
+    show_user_info_sidebar,
+    check_session_validity
+)
 from datetime import datetime
 import yaml
+
+# Initialize auth session
+init_session_state()
+
+# Check if user is authenticated
+if not is_authenticated():
+    st.warning("⚠️ Please login to access the dashboard")
+    st.info("Click the button below to go to the login page")
+
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col2:
+        if st.button("🔑 Go to Login", use_container_width=True):
+            st.switch_page("pages/0_Login.py")
+
+    st.stop()
+
+# Check session validity
+check_session_validity()
 
 # Page config
 st.set_page_config(
@@ -215,6 +240,9 @@ with st.sidebar:
         'premium': 'tier-premium',
         'enterprise': 'tier-enterprise'
     }
+
+    # Show user info
+    show_user_info_sidebar()
 
     st.markdown(f"""
     <div style="text-align: center; margin-bottom: 1.5rem;">
